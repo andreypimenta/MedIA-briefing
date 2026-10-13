@@ -34,7 +34,7 @@ test("hot-signal activity does not hide editorial collection stopping", async ()
   await material(signal, "signal");
   const finding = (await collectFindings(now)).find(f => f.key === "content.collect");
   assert.equal(finding?.level, "now");
-  assert.match(finding!.title, /文章|编辑/);
+  assert.match(finding!.title, /artigos|editorial/);
   await material(editorial, "editorial");
   assert.equal((await collectFindings(now)).find(f => f.key === "content.collect"), undefined);
 });
@@ -76,8 +76,8 @@ test("weekly totals count every silent source and include successful attributed 
     assert.equal(result.silent, 20, "18 silent plus two chronic sources, not the display limit or the collector");
   } finally { console.log = log; }
   const text = lines.join("\n");
-  assert.match(text, /编辑内容/);
-  assert.match(text, /热度信号/);
+  assert.match(text, /Conteúdo editorial/);
+  assert.match(text, /Sinais de Em alta/);
   assert.doesNotMatch(text, new RegExp(`· ${collector}`));
 });
 
@@ -92,8 +92,8 @@ test("quality follow-ups count undated editorial articles and edits without judg
   const quality = findings.find(f => f.key === "sources.quality.editorial");
   assert.equal(quality?.level, "later");
   assert.ok(quality!.detail!.includes(editorial));
-  assert.match(quality!.detail!, /缺发布时间 1/);
-  assert.match(quality!.detail!, /反复修订 1/);
+  assert.match(quality!.detail!, /1 sem data de publicação/);
+  assert.match(quality!.detail!, /1 revisados repetidamente/);
   assert.equal(findings.find(f => f.key === "sources.quality.hot_signal"), undefined);
 });
 
@@ -117,6 +117,6 @@ test("saved detail budget waits and shutdowns do not alert, while HTTP errors an
   assert.ok(finding);
   assert.ok(!finding.detail!.includes(budget));
   assert.ok(!finding.detail!.includes(shutdown));
-  assert.ok(finding.detail!.includes(`${mixed}）：近 7 天 2 次`));
-  assert.ok(finding.detail!.includes(`${legacy}）：近 7 天 1 次`));
+  assert.ok(finding.detail!.includes(`${mixed}): 2 nos últimos 7 dias`));
+  assert.ok(finding.detail!.includes(`${legacy}): 1 nos últimos 7 dias`));
 });

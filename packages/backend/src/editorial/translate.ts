@@ -1,4 +1,4 @@
-// Full-text Chinese translations: made by the worker after an item
+// Full-text translations into the site's language (SITE_LANG): made by the worker after an item
 // is selected, for sources whose full text may be shown on the site; a page read never translates.
 // Bodies are translated block by block (paragraphs, headings, list items, captions, table cells) so the
 // sanitised structure stays as it is. Inside a block, images and inline code never reach the model
@@ -13,7 +13,7 @@ import { sql } from "../db.ts";
 import { sanitizeBody, textToHtml } from "../content/sanitize.ts";
 import { chatJson } from "../providers/llm.ts";
 import { completeReceipt } from "../providers/receipts.ts";
-import { collapseWhitespace } from "../lib/text.ts";
+import { collapseWhitespace, isSiteLanguage, looksPortuguese, SITE_LANG } from "../lib/text.ts";
 import { isEmptyOrLinkOnly } from "../content/posts.ts";
 import { sha256 } from "../lib/ids.ts";
 import { modelFor } from "./models.ts";
@@ -25,7 +25,7 @@ export const TRANSLATE_PROMPT_VERSION = promptVersion("translate-body", "transla
 const BATCH_CHARS = 3500;
 /** Longer bodies get their first part translated and are marked incomplete. */
 const MAX_CHARS = 60_000;
-/** X posts shorter than this carry their meaning in the Chinese title and summary. */
+/** X posts shorter than this carry their meaning in the site-language title and summary. */
 const X_MIN_CHARS = 60;
 
 const BLOCK = new Set(["p", "h2", "h3", "h4", "h5", "li", "blockquote", "figcaption", "td", "th", "dt", "dd", "caption"]);
@@ -47,8 +47,6 @@ export interface TranslateResult {
   segments?: number;
   reason?: string;
 }
-
-const isChinese = (language: string | null, sample: string) => language === "zh" || (/[一-鿿]/.test(sample.slice(0, 400)) && language !== "en");
 
 /** Leaf text blocks of a sanitised body, in document order, skipping code. */
 function segmentsOf($: cheerio.CheerioAPI): Element[] {
@@ -180,7 +178,7 @@ export async function translateArticle(articleId: string): Promise<TranslateResu
     const text = String(row.x_post?.text ?? row.body_text ?? "").trim();
     if (isEmptyOrLinkOnly(text)) return result({ status: "skipped", reason: "no text to translate" });
     const meaningful = collapseWhitespace(text.replace(/https?:\/\/\S+/g, ""));
-    if (isChinese(row.language, text)) return result({ status: "skipped", reason: "already Chinese" });
+    if (isSiteLanguage(row.language, text)) return result({ status: "skipped", reason: "already in the site language" });
     if (meaningful.length < X_MIN_CHARS) return result({ status: "skipped", reason: "short post" });
     const translated = await translateAll(articleId, row.revision, [text], SYSTEM_POST);
     const [t] = translated.translations;
@@ -189,7 +187,7 @@ export async function translateArticle(articleId: string): Promise<TranslateResu
     return result({ status: "translated", segments: 1 });
   }
 
-  if (!row.body_html || isChinese(row.language, row.body_text ?? "")) return result({ status: "skipped", reason: "no foreign-language body" });
+  if (!row.body_html || isSiteLanguage(row.language, row.body_text ?? "")) return result({ status: "skipped", reason: "no foreign-language body" });
   const $ = cheerio.load(row.body_html, null, false);
   const blocks = segmentsOf($);
   if (!blocks.length) return result({ status: "skipped", reason: "no translatable text" });
@@ -234,7 +232,7 @@ async function store(articleId: string, revision: number, title: string, html: s
   await sql.begin(async (tx) => {
     const changed = await tx`
       INSERT INTO translations (article_id, lang, revision, title, body_html, body_text, complete, origin)
-      VALUES (${articleId}, 'zh', ${revision}, ${title}, ${html}, ${text}, ${complete}, 'model')
+      VALUES (${articleId}, ${SITE_LANG}, ${revision}, ${title}, ${html}, ${text}, ${complete}, 'model')
       ON CONFLICT (article_id, lang) DO UPDATE SET revision = EXCLUDED.revision, title = EXCLUDED.title, body_html = EXCLUDED.body_html,
         body_text = EXCLUDED.body_text, complete = EXCLUDED.complete, origin = 'model', created_at = now()
       WHERE translations.origin <> 'source' AND translations.revision <= EXCLUDED.revision
@@ -246,10 +244,10 @@ async function store(articleId: string, revision: number, title: string, html: s
   });
 }
 
-/** A quoted post worth translating: at least a few letters beyond its links, and not already Chinese. */
+/** A quoted post worth translating: at least a few letters beyond its links, and not already in the site language. */
 function quoteTranslatable(text: string): boolean {
   const words = collapseWhitespace(text.replace(/https?:\/\/\S+/g, " "));
-  return words.length >= 10 && (words.match(/\p{L}/gu) ?? []).length >= 2 && !/[一-鿿]/.test(words);
+  return words.length >= 10 && (words.match(/\p{L}/gu) ?? []).length >= 2 && !looksPortuguese(words);
 }
 
 /**
@@ -261,7 +259,7 @@ export async function translateQuotes(opts: { days?: number; limit?: number; bud
   const started = Date.now();
   const rows = await sql<{ tweet_id: string; text: string; text_hash: string | null; own_zh: string | null }[]>`
     SELECT DISTINCT ON (q.tweet_id) q.tweet_id, a.x_post->'quoted'->>'text' AS text, qt.text_hash,
-      (SELECT tr.body_text FROM articles o JOIN translations tr ON tr.article_id = o.id AND tr.lang = 'zh' AND tr.revision >= o.revision
+      (SELECT tr.body_text FROM articles o JOIN translations tr ON tr.article_id = o.id AND tr.lang = ${SITE_LANG} AND tr.revision >= o.revision
        WHERE o.identity_key = 'x:' || q.tweet_id AND tr.complete AND coalesce(tr.body_text, '') <> '') AS own_zh
     FROM publications p JOIN articles a ON a.id = p.article_id
     CROSS JOIN LATERAL (SELECT substring(a.x_post->'quoted'->>'url' from '/status/([0-9]+)') AS tweet_id) q
@@ -327,8 +325,8 @@ export async function translatePending(opts: { limit?: number; budgetMs?: number
   const started = Date.now();
   const rows = await sql<{ article_id: string }[]>`
     SELECT p.article_id FROM publications p JOIN articles a ON a.id = p.article_id
-    LEFT JOIN translations tr ON tr.article_id = p.article_id AND tr.lang = 'zh'
-    WHERE p.selected AND p.visibility = 'public' AND p.body_mode = 'full' AND coalesce(a.language, '') <> 'zh'
+    LEFT JOIN translations tr ON tr.article_id = p.article_id AND tr.lang = ${SITE_LANG}
+    WHERE p.selected AND p.visibility = 'public' AND p.body_mode = 'full' AND coalesce(a.language, '') NOT ILIKE ${SITE_LANG + '%'}
       AND (p.discovered_at > now() - interval '3 days'
            OR EXISTS (SELECT 1 FROM article_revisions r WHERE r.article_id = a.id AND r.revision = a.revision AND r.revision > 1
                       AND r.created_at > now() - interval '3 days'))

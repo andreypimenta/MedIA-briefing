@@ -1,34 +1,34 @@
-# 隐私说明
+# Privacidade
 
-这是开源框架自带的模板，只写了这套软件默认会处理哪些数据。上线前请按你的实际情况改写（运营主体、联系方式、你另外接入的统计或服务），必要时请专业人士审阅。
+Este é o modelo que acompanha o framework open source e descreve apenas os dados que o software trata por padrão. Antes de colocar o site no ar, reescreva-o de acordo com a sua situação real (responsável pelo site, forma de contato, serviços de estatística ou outros que você integrar) e, se necessário, peça a revisão de um profissional, observando a Lei Geral de Proteção de Dados (LGPD) e a legislação brasileira aplicável.
 
-| 项 | 值 |
+| Item | Valor |
 |---|---|
-| 版本 | 请填写 |
-| 生效日期 | 请填写 |
-| 运营主体 | 请填写 |
-| 联系方式 | 请填写 |
+| Versão | A preencher |
+| Vigência | A preencher |
+| Responsável | A preencher |
+| Contato | A preencher |
 
-页首说明：
+Introdução:
 
-> 使用本站不需要注册或登录。我们只处理让网站正常运行、处理反馈所必需的信息，不出售个人信息。
+> Para usar este site não é preciso se cadastrar nem fazer login. Tratamos apenas as informações necessárias para o site funcionar e para responder ao feedback, e não vendemos dados pessoais.
 
-## 1. 浏览器本地数据
+## 1. Dados locais do navegador
 
-收藏、已读记录、深浅色设置、最近搜索（你搜过的词，最多 10 条）、更新日志已读状态和反馈草稿保存在你当前的浏览器里；返回时的列表位置、滚动位置和展开状态只存在当前标签页的会话存储里，关闭标签页即清除。这些都不会发送到服务器。清除浏览器数据后它们会消失；换设备不会同步。收藏、已读记录和深浅色设置可以在“收藏”页导出和导入。
+Itens salvos, histórico de leitura, tema claro ou escuro, buscas recentes (os termos que você buscou, no máximo 10), o estado de leitura das novidades e o rascunho do feedback ficam guardados no seu navegador atual. A posição na lista, a rolagem e o que estava expandido ao voltar a uma página ficam só no armazenamento da sessão da aba atual e são apagados quando a aba é fechada. Nada disso é enviado ao servidor. Esses dados somem quando você limpa os dados do navegador e não são sincronizados entre dispositivos. Itens salvos, histórico de leitura e tema podem ser exportados e importados na página "Salvos".
 
-## 2. 反馈
+## 2. Feedback
 
-你在反馈页提交的内容、选填的邮箱、提交时所在页面的地址，以及你选择附上的截图，会保存在服务器上，用于处理你的反馈。站点配置了飞书内部群时，反馈会转发到那个群，截图上传到飞书后服务器上不再保留。为防止滥用，服务器会保存一个由网络地址和浏览器类别计算出的、无法还原的标识，用于限流和封禁滥用来源。
+O que você envia pela página de feedback, o e-mail opcional, o endereço da página em que você estava e a captura de tela que você decidir anexar ficam guardados no servidor para tratarmos o seu feedback. Se o site tiver um grupo interno do Feishu configurado, o feedback é encaminhado a esse grupo e, depois que a captura de tela é enviada ao Feishu, ela deixa de ser guardada no servidor. Para evitar abusos, o servidor guarda um identificador irreversível calculado a partir do endereço de rede e do tipo de navegador, usado para limitar a frequência de envios e bloquear origens abusivas.
 
-## 3. 服务器与网络日志
+## 3. Registros do servidor e da rede
 
-本软件默认不做访客统计。你的服务器、反向代理或 CDN 可能会按它们自己的配置记录访问日志（如 IP 地址、访问时间、页面地址、浏览器信息）。请在这里写明你实际使用的服务和保存期限。
+Por padrão, o software não coleta estatísticas de visitantes. Seu servidor, proxy reverso ou CDN podem registrar acessos conforme a configuração deles (por exemplo, endereço IP, horário, página acessada e informações do navegador). Descreva aqui os serviços que você realmente usa e por quanto tempo os registros são guardados.
 
-## 4. 第三方内容
+## 4. Conteúdo de terceiros
 
-本站展示的是第三方原文的摘要与链接。点击原文链接后，你访问的是对方网站，适用对方的隐私政策。
+Este site exibe resumos e links de textos originais de terceiros. Ao clicar no link do original, você passa a acessar o site de terceiros, que tem sua própria política de privacidade.
 
-## 5. 联系我们
+## 5. Fale com a gente
 
-请写明联系方式，以及查询、更正或删除反馈资料的方式。
+Informe a forma de contato e como o titular pode consultar, corrigir ou excluir os dados enviados pelo feedback, nos termos da LGPD.

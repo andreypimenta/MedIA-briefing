@@ -44,7 +44,7 @@ async function article(): Promise<string> {
     sourceId: SOURCE, url: `https://example.com/${T}-${n}`, title: `Test ${n}`, bodyText: BODY, bodyHtml: `<p>${BODY}</p>`, bodyStatus: "ok", via: "fetch", publishedAt: new Date(),
   });
   await sql`INSERT INTO analyses (article_id, input_revision, origin, relevance, category, title_zh, summary_zh, reason_zh, score, selected)
-            VALUES (${articleId}, 1, 'rule', 'pass', 'ai-models', ${`标题${n}-${T}`}, ${`SUMMARY-${n}-${T}`}, '理由', 90, true)`;
+            VALUES (${articleId}, 1, 'rule', 'pass', 'research', ${`标题${n}-${T}`}, ${`SUMMARY-${n}-${T}`}, '理由', 90, true)`;
   return articleId;
 }
 
@@ -70,24 +70,24 @@ test("Markdown preserves a table's headings, caption, links, alignment and multi
   const id = await article();
   const table = '<table><caption>Benchmark results</caption><thead><tr><th>Model</th><th align="right">Score</th></tr></thead><tbody><tr><td><a href="https://example.com/model">A|B</a></td><td>90<br>±1</td></tr></tbody></table>';
   await sql`UPDATE articles SET language = 'en', body_html = ${table} WHERE id = ${id}`;
-  await sql`INSERT INTO translations (article_id, revision, body_html, body_text, origin) VALUES (${id}, 1, ${table.replace('Benchmark results', '基准结果').replace('Model', '模型').replace('Score', '分数')}, '基准结果', 'source')`;
+  await sql`INSERT INTO translations (article_id, lang, revision, body_html, body_text, origin) VALUES (${id}, 'pt', 1, ${table.replace('Benchmark results', 'Resultados do benchmark').replace('Model', 'Modelo').replace('Score', 'Pontuação')}, 'Resultados do benchmark', 'source')`;
   await publishArticle(id, released());
   const response = await get(`/items/${id}/markdown`);
   assert.equal(response.status, 200);
   const $ = cheerio.load(marked.parse(response.body, { async: false, gfm: true }));
   assert.equal($('table').length, 2, 'both original and translated tables survive export');
-  assert.deepEqual($('table th').toArray().map((node) => $(node).text()), ['模型', '分数', 'Model', 'Score']);
+  assert.deepEqual($('table th').toArray().map((node) => $(node).text()), ['Modelo', 'Pontuação', 'Model', 'Score']);
   assert.equal($('table th').last().attr('align'), 'right');
   assert.equal($('table td a').last().text(), 'A|B');
   assert.equal($('table td a').last().attr('href'), 'https://example.com/model');
   assert.equal($('table td').last().find('br').length, 1);
-  assert.ok($.text().includes('基准结果') && $.text().includes('Benchmark results'));
+  assert.ok($.text().includes('Resultados do benchmark') && $.text().includes('Benchmark results'));
 });
 
 test("Markdown retains tables that cannot be represented without changing their meaning", async () => {
   const id = await article();
   const html = '<table><tr><td>Region</td><td>Value</td></tr><tr><td>CN</td><td>1</td></tr></table><table><tr><th colspan="2">Merged</th></tr><tr><td rowspan="2">A</td><td>2</td></tr><tr><td>3</td></tr></table><table><tr><th>Example</th></tr><tr><td><pre><code class="language-python">print(1)\nprint(2)</code></pre></td></tr></table>';
-  await sql`UPDATE articles SET language = 'zh', body_html = ${html} WHERE id = ${id}`;
+  await sql`UPDATE articles SET language = 'pt', body_html = ${html} WHERE id = ${id}`;
   await publishArticle(id, released());
   const $ = cheerio.load(marked.parse((await get(`/items/${id}/markdown`)).body, { async: false, gfm: true }));
   assert.equal($('table').length, 3);
@@ -100,7 +100,7 @@ test("Markdown retains tables that cannot be represented without changing their 
 test("Markdown retains numeric superscripts, subscripts and fenced code while respecting full-text permission", async () => {
   const id = await article();
   const html = '<p>Compute 10<sup>24</sup> FLOP; H<sub>2</sub>O.</p><pre><code class="language-python">print(2 ** 3)\n</code></pre>';
-  await sql`UPDATE articles SET language = 'zh', body_html = ${html} WHERE id = ${id}`;
+  await sql`UPDATE articles SET language = 'pt', body_html = ${html} WHERE id = ${id}`;
   await publishArticle(id, released());
   const response = await get(`/items/${id}/markdown`);
   const $ = cheerio.load(marked.parse(response.body, { async: false, gfm: true }));
@@ -120,21 +120,21 @@ test("Markdown retains numeric superscripts, subscripts and fenced code while re
 test("site reading sends one language while exports retain both, including after withdrawal", async () => {
   const id = await article();
   await sql`UPDATE articles SET language = 'en', body_html = '<h2>Original heading</h2><p>Original full body</p>' WHERE id = ${id}`;
-  await sql`INSERT INTO translations (article_id, revision, body_html, body_text, origin) VALUES (${id}, 1, '<h2>译文标题</h2><p>中文完整正文</p>', '中文完整正文', 'source')`;
+  await sql`INSERT INTO translations (article_id, lang, revision, body_html, body_text, origin) VALUES (${id}, 'pt', 1, '<h2>Título traduzido</h2><p>Texto completo em português</p>', 'Texto completo em português', 'source')`;
   await publishArticle(id, released());
   const normal = JSON.parse((await get(`/api/site/items/${id}`)).body);
   const original = JSON.parse((await get(`/api/site/items/${id}/original`)).body);
   assert.equal(normal.bodyLanguage, 'zh');
   assert.equal(normal.hasTranslation, true);
   assert.equal(normal.body.original, null);
-  assert.ok(normal.body.zh.includes('中文完整正文'));
-  assert.equal(normal.outline[0].text, '译文标题');
+  assert.ok(normal.body.zh.includes('Texto completo em português'));
+  assert.equal(normal.outline[0].text, 'Título traduzido');
   assert.equal(original.bodyLanguage, 'original');
   assert.equal(original.body.zh, null);
   assert.ok(original.body.original.includes('Original full body'));
   assert.equal(original.outline[0].text, 'Original heading');
   const md = (await get(`/items/${id}/markdown`)).body;
-  assert.ok(md.includes('Original full body') && md.includes('中文完整正文'));
+  assert.ok(md.includes('Original full body') && md.includes('Texto completo em português'));
   await setVisibility(id, { visibility: 'withdrawn', reason: 'test', version: 0 }, 'test');
   assert.equal((await get(`/api/site/items/${id}/original`)).status, 404);
 });

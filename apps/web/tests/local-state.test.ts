@@ -27,7 +27,8 @@ async function reader(starred: unknown[] = []) {
 const displayDate = (value: string) => `${beijingDate(value)} ${beijingTime(value)}`;
 
 test("import keeps bookmarks with invalid dates and persists displayable replacements", async () => {
-  const invalid = ["broken", "", "999999-01-01", "+275760-09-13T00:00:00.000Z", null, 42, {}];
+  // The last instant JavaScript can represent, on the side the site's zone (UTC−3) shifts it past.
+  const invalid = ["broken", "", "999999-01-01", "-271821-04-20T00:00:00.000Z", null, 42, {}];
   const { state, values } = await reader();
   const before = Date.now();
   const report = state.importBundle(JSON.stringify({ version: 1, starred: invalid.map((date, i) => ({

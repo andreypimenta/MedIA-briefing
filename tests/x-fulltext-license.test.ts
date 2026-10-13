@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { after, test } from "node:test";
 import { closeDb, sql } from "@aihot/backend/db";
+import { SITE_LANG } from "@aihot/backend/lib/text";
 import { updateSource } from "@aihot/backend/admin/sources";
 import { upsertMaterial, type XPostData } from "@aihot/backend/content/materials";
 import { stopBoss } from "@aihot/backend/jobs/queue";
@@ -42,34 +43,34 @@ async function fixture(options: {
   const quoted = `X-QUOTED-${key}`;
   const quotedZh = options.translation === "same" ? quoted : `X-QUOTED-ZH-${key}`;
   const media = `X-MEDIA-${key}`;
-  const summary = options.summary === false || options.shape === "quote-only" ? null : `摘要-${key}`;
+  const summary = options.summary === false || options.shape === "quote-only" ? null : `Resumo-${key}`;
   const kind = options.kind ?? "x_search";
   const url = kind === "x_search" ? `https://x.com/license/status/${tweet}` : `https://example.org/${key}`;
   const xPost: XPostData | null = kind === "rss" || options.shape === "missing" ? null : {
-    tweetId: tweet, authorName: "许可测试作者", handle: "license", avatarUrl: "https://example.org/avatar.png",
+    tweetId: tweet, authorName: "Autor do teste de licença", handle: "license", avatarUrl: "https://example.org/avatar.png",
     text: options.shape === "quote-only" ? "" : main,
-    quoted: { authorName: "引用作者", handle: "quoted", text: quoted, url: `https://x.com/quoted/status/${quote}` },
+    quoted: { authorName: "Autor citado", handle: "quoted", text: quoted, url: `https://x.com/quoted/status/${quote}` },
     media: [
-      { kind: "image", url: `https://example.org/${media}.png`, alt: `${media}-图片描述`, width: 800, height: 600 },
-      { kind: "video", url: `https://example.org/${media}.mp4`, poster: `https://example.org/${media}-poster.png`, alt: `${media}-视频描述` },
+      { kind: "image", url: `https://example.org/${media}.png`, alt: `${media}-descrição da imagem`, width: 800, height: 600 },
+      { kind: "video", url: `https://example.org/${media}.mp4`, poster: `https://example.org/${media}-poster.png`, alt: `${media}-descrição do vídeo` },
     ],
   };
   await sql`INSERT INTO sources (id, name, kind, tier, participation_mode, site_fulltext, syndicate_fulltext, icon_url, next_fetch_at)
-    VALUES (${source}, '许可测试来源', ${kind}, 'T1', ${options.mode ?? "editorial"}, ${options.full ?? false}, ${options.syndicate ?? true}, 'https://example.org/source.png', '2100-01-01')`;
+    VALUES (${source}, 'Fonte do teste de licença', ${kind}, 'T1', ${options.mode ?? "editorial"}, ${options.full ?? false}, ${options.syndicate ?? true}, 'https://example.org/source.png', '2100-01-01')`;
   const { articleId: id } = await upsertMaterial({ sourceId: source, url, title: `Original title ${key}`, language: "en",
     bodyText: options.bodyStatus === "none" ? null : main, bodyHtml: options.bodyStatus === "none" ? null : `<p>${main}</p>`,
     bodyStatus: options.bodyStatus ?? "ok", xPost, via: "fetch", publishedAt: new Date() });
   await sql`INSERT INTO analyses (article_id, input_revision, origin, relevance, category, title_zh, summary_zh, reason_zh, tags, score, selected)
-    VALUES (${id}, 1, 'rule', 'pass', 'ai-models', ${`标题-${key}`}, ${summary}, '推荐理由', ${[T, key]}, 90, true)`;
+    VALUES (${id}, 1, 'rule', 'pass', 'products', ${`Título-${key}`}, ${summary}, 'Por que ler', ${[T, key]}, 90, true)`;
   if (options.translation !== "missing") {
-    await sql`INSERT INTO translations (article_id, revision, body_text, body_html, origin)
-      VALUES (${id}, ${options.translation === "stale" ? 0 : 1}, ${zh}, ${`<p>${zh}</p>`}, 'source')`;
+    await sql`INSERT INTO translations (article_id, lang, revision, body_text, body_html, origin)
+      VALUES (${id}, ${SITE_LANG}, ${options.translation === "stale" ? 0 : 1}, ${zh}, ${`<p>${zh}</p>`}, 'source')`;
   }
   await sql`INSERT INTO quote_translations (tweet_id, text_hash, text_zh, origin) VALUES (${quote}, ${key}, ${quotedZh}, 'reused')`;
   const story = randomUUID();
-  const [savedStory] = await sql<{ id: number }[]>`INSERT INTO stories (public_id, title) VALUES (${story}, '许可测试事件') RETURNING id`;
+  const [savedStory] = await sql<{ id: number }[]>`INSERT INTO stories (public_id, title) VALUES (${story}, 'Evento do teste de licença') RETURNING id`;
   const fact = `fact-${key}`;
-  const [savedFact] = await sql<{ id: number }[]>`INSERT INTO facts (public_id, story_id, title) VALUES (${fact}, ${savedStory!.id}, '许可测试进展') RETURNING id`;
+  const [savedFact] = await sql<{ id: number }[]>`INSERT INTO facts (public_id, story_id, title) VALUES (${fact}, ${savedStory!.id}, 'Atualização do teste de licença') RETURNING id`;
   await sql`INSERT INTO fact_articles (fact_id, article_id, role) VALUES (${savedFact!.id}, ${id}, 'report')`;
   await publishArticle(id, { releasedAt: new Date(Date.now() - 60_000) });
   const [publication] = await sql`SELECT body_mode, eligible FROM publications WHERE article_id = ${id}`;
@@ -88,7 +89,7 @@ async function get(url: string, status = 200, type = /application\/json/) {
 }
 
 function noContent(body: string, f: Fixture) {
-  for (const marker of f.markers) assert.ok(!body.includes(marker), `未授权内容泄露：${marker}`);
+  for (const marker of f.markers) assert.ok(!body.includes(marker), `conteúdo não licenciado vazou: ${marker}`);
 }
 
 async function summaryDetail(f: Fixture) {
@@ -101,7 +102,7 @@ async function summaryDetail(f: Fixture) {
     noContent(response.body, f);
     assert.equal(detail.x, null);
     assert.equal(detail.body, null);
-    assert.equal(detail.readingMode, "full", "全文许可不等于严格仅摘要的人工可见性");
+    assert.equal(detail.readingMode, "full", "a licença de texto completo não equivale à visibilidade manual estritamente só de resumo");
     assert.equal(detail.markdownAvailable, !!f.summary);
   }
 }
@@ -119,8 +120,8 @@ async function summaryLists(f: Fixture) {
   // The group's report list carries titles and sources only, no summaries.
   for (const [path, summary] of [[`/api/site/timeline?tag=${f.key}`, true], [`/api/site/pool?tag=${f.key}`, true], [`/api/site/groups/${f.fact}/reports`, false]] as const) {
     const response = await get(path);
-    assert.ok(response.body.includes(f.id), `${path} 确实包含目标条目`);
-    if (summary) assert.ok(response.body.includes(f.summary!), `${path} 保留摘要`);
+    assert.ok(response.body.includes(f.id), `${path} contém o item-alvo`);
+    if (summary) assert.ok(response.body.includes(f.summary!), `${path} mantém o resumo`);
     noContent(response.body, f);
   }
   // Topic pages and the other card lists share this projection.
@@ -131,14 +132,14 @@ async function summaryLists(f: Fixture) {
 async function feedItem(path: string, f: Fixture) {
   const response = await get(path, 200, /(?:application|text)\/(?:rss\+)?xml/);
   const item = response.body.match(/<item>[\s\S]*?<\/item>/g)?.find((part) => part.includes(`<guid isPermaLink="false">${f.id}</guid>`));
-  assert.ok(item, `${path} 确实包含目标条目`);
+  assert.ok(item, `${path} contém o item-alvo`);
   assert.ok(item.includes(f.summary!));
   return item;
 }
 
 async function revoke(f: Fixture, patch: { site_fulltext?: boolean; syndicate_fulltext?: boolean }) {
   const [source] = await sql<{ updated_at: Date }[]>`SELECT updated_at FROM sources WHERE id = ${f.source}`;
-  await updateSource(f.source, { patch, version: source!.updated_at.toISOString(), reason: "本地许可测试" }, "test");
+  await updateSource(f.source, { patch, version: source!.updated_at.toISOString(), reason: "teste local de licença" }, "test");
   const [queued] = await sql<{ value: { status: string } }[]>`SELECT value FROM settings WHERE key = ${`republish.source:${f.source}`}`;
   assert.equal(queued!.value.status, "queued");
   await republishSource(f.source);

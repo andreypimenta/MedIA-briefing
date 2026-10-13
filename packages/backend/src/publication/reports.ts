@@ -1,7 +1,7 @@
 // Reports through the public read layer: website DTOs and the v1 shapes. Only real reports are
 // listed; a missing date is a 404, never another day. Withdrawn citations are marked, not shown.
 import type { ReportCitation, ReportDetail, ReportIndexEntry, ReportNavigationEntry, ReportKind } from "@aihot/contracts/site";
-import { REPORTS, SITE, withSubject } from "@aihot/site";
+import { REPORTS, SITE } from "@aihot/site";
 import { sql } from "../db.ts";
 import { cached, type Cached } from "../lib/cache.ts";
 import { proxiedImage, proxiedImageSet } from "../media/imgproxy.ts";
@@ -160,6 +160,10 @@ async function dailyLeads(rows: Array<{ key: string; content: Record<string, any
   return leads;
 }
 
+/** The names the issues go by in their default titles ("Briefing diário · 2026-10-04", "MedIA Briefing · Briefing semanal · 2026-W38"). */
+export const DAILY_ISSUE_NAME = "Briefing diário";
+export const PERIOD_ISSUE_NAMES = { weekly: "Briefing semanal", monthly: "Briefing mensal" } as const;
+
 /**
  * A weekly's or monthly's overview: the one written for it, else what it carries, naming the first three
  * of its lead, highlights and entries still public. `gone` must cover every entry.
@@ -169,13 +173,14 @@ function periodOverview(content: Record<string, any>, kind: "weekly" | "monthly"
   if (!changed && typeof content.overview === "string" && content.overview) return content.overview;
   const shown = leadCandidates(content, "periodic").filter((e) => !e.itemId || !gone.has(String(e.itemId)));
   if (!shown.length) return null;
-  return `${kind === "weekly" ? "本周" : "本月"} ${shown.length} ${REPORTS.entry.measure}${REPORTS.entry.noun}，最受关注的是：${shown.slice(0, 3).map((e) => e.title).join("；")}。`;
+  return `${kind === "weekly" ? "Nesta semana" : "Neste mês"}, ${shown.length}${REPORTS.entry.measure ? ` ${REPORTS.entry.measure}` : ""} ${REPORTS.entry.noun}; os que mais chamaram atenção: ${shown.slice(0, 3).map((e) => e.title).join("; ")}.`;
 }
 
-/** A weekly or monthly's own headline; the composer's "<site name> 周报 · 2026-W38" names the issue, not its news. */
+/** A weekly or monthly's own headline; the composer's "<site name> · Briefing semanal · 2026-W38" names the issue, not its news. */
 function periodicHeadline(content: Record<string, any>): string | null {
   const text = String(content.headline ?? content.title ?? "");
-  const issueName = text.startsWith(`${SITE.name} `) && /^[周月]报 · /.test(text.slice(SITE.name.length + 1));
+  const issueName = text.startsWith(`${SITE.name} `) && (Object.values(PERIOD_ISSUE_NAMES).some((name) => text.startsWith(`${SITE.name} · ${name} · `))
+    || /^[周月]报 · /.test(text.slice(SITE.name.length + 1)));
   return text && !issueName ? text : null;
 }
 
@@ -360,8 +365,8 @@ export async function loadReport(kind: ReportKind, key: string): Promise<ReportD
   const [{ prev, next }, picture] = await Promise.all([neighbors(kind, key), leadItem?.itemId && leadItem.available ? leadCover(leadItem.itemId) : null]);
   const cover = picture && leadItem ? { ...picture, caption: kind === "daily" || c.leadItemId ? null : leadItem.title } : null;
   const headline = kind === "daily" ? null : periodicHeadline(c);
-  const title = kind === "daily" ? `${withSubject("日报")} · ${key}`
-    : String((hasCitedLead && c.title === headline ? named?.title : c.title) ?? (kind === "weekly" ? `${SITE.name} 周报 · ${key}` : `${SITE.name} 月报 · ${key}`));
+  const title = kind === "daily" ? `${DAILY_ISSUE_NAME} · ${key}`
+    : String((hasCitedLead && c.title === headline ? named?.title : c.title) ?? `${SITE.name} · ${PERIOD_ISSUE_NAMES[kind]} · ${key}`);
   return {
     kind,
     key,

@@ -10,6 +10,7 @@ import { promisify } from "node:util";
 import { config, credential } from "../config.ts";
 import { sql } from "../db.ts";
 import { screenshotsForwarded } from "./feedback.ts";
+import { beijingDate } from "@aihot/contracts/time";
 
 const run = promisify(execFile);
 const KEEP_LOCAL = 3;
@@ -111,7 +112,7 @@ export async function runBackup(now = new Date()) {
     });
   }
   const out: Array<{ key: string; bytes: number; sha256: string }> = [];
-  const bj = new Date(now.getTime() + 8 * 3600_000);
+  const bj = new Date(Date.parse(`${beijingDate(now)}T00:00:00Z`));
   const prefixes = ["daily"];
   if (bj.getUTCDay() === 0) prefixes.push("weekly");
   if (bj.getUTCDate() === 1) prefixes.push("monthly");

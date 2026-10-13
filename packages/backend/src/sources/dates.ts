@@ -1,5 +1,6 @@
 // Published dates as list pages, articles and JSON lists print them, read the same on every host.
 import type { SourceRow } from "./types.ts";
+import { SITE_UTC_OFFSET } from "@aihot/contracts/time";
 
 /** The offset a source's article pages print their dates in: its detail rules' own, else its listing's. */
 export function articleUtcOffset(config: SourceRow["config"]): string | undefined {
@@ -8,7 +9,7 @@ export function articleUtcOffset(config: SourceRow["config"]): string | undefine
 
 /**
  * A time followed by its zone: "10:00Z", "10:00:00+08:00", "10:00:00 +0000", "10:00 PM GMT", "10:00 EST".
- * CST is no zone here: Date.parse reads US Central, Chinese pages mean China, so it is read in the source's offset.
+ * CST is no zone here: Date.parse reads US Central, but pages mean different zones by it, so it is read in the source's offset.
  */
 const EXPLICIT_ZONE = /\d{1,2}:\d{2}(?::\d{2}(?:\.\d+)?)?\s*(?:[AP]M\s*)?(?:Z|[+-]\d{2}:?\d{2}|GMT|UTC?|[EMP][SD]T|CDT)\b/i;
 
@@ -29,7 +30,7 @@ function atOffset(y: string | number, mo: string | number, d: string | number, h
  * on every host: a time with its zone, and an ISO date alone (UTC midnight). Anything else it would read
  * in the server's local zone (UTC in Docker), so "2026-09-26 10:00" is read in the source's offset instead.
  */
-export function parseLooseDate(value: string | null | undefined, utcOffset = "+08:00"): Date | null {
+export function parseLooseDate(value: string | null | undefined, utcOffset = SITE_UTC_OFFSET): Date | null {
   if (!value) return null;
   const v = value.trim();
   if (!v) return null;

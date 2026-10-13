@@ -1,7 +1,7 @@
 // What the judging steps read about an article: loaded once per analysis and rendered per step.
 import { beijingDate, beijingTime } from "@aihot/contracts/time";
 import { sql } from "../db.ts";
-import { collapseWhitespace, truncate } from "../lib/text.ts";
+import { collapseWhitespace, SITE_LANG, truncate } from "../lib/text.ts";
 import { produceImage, rasterImage, SVG_PASSTHROUGH_MAX_BYTES } from "../media/images.ts";
 import type { ContentPart } from "../providers/llm.ts";
 import { MAX_BODY_CHARS } from "./writing.ts";
@@ -31,7 +31,7 @@ export interface AnalyzeInputArticle {
     /** The source asks for the article page (fetchPublicContent, detail pages, web listings). */
     fetchesBody?: boolean;
   };
-  /** Stored Chinese translation of the body (e.g. a full post whose original was truncated). */
+  /** Stored site-language translation of the body (e.g. a full post whose original was truncated). */
   translationZh?: string | null;
 }
 
@@ -41,7 +41,7 @@ export interface AnalyzeInputArticle {
  */
 export function withXArticle(xPost: Record<string, any> | null, article: { title?: string; text?: string } | null): Record<string, any> | null {
   if (!xPost || !article?.text) return xPost;
-  const parts = [String(xPost.text ?? "").trim(), article.title ? `【X 长文】${article.title}` : "【X 长文】", article.text];
+  const parts = [String(xPost.text ?? "").trim(), article.title ? `【X Article】${article.title}` : "【X Article】", article.text];
   return { ...xPost, text: parts.filter(Boolean).join("\n\n") };
 }
 
@@ -56,7 +56,7 @@ export async function loadAnalyzeInput(articleId: string): Promise<AnalyzeInputA
            s.name AS source_name, s.kind AS source_kind, s.tier, s.first_party, s.tags AS source_tags, s.owner_entity_id, s.config,
            tr.body_text AS translation_zh
     FROM articles a JOIN sources s ON s.id = a.source_id
-    LEFT JOIN translations tr ON tr.article_id = a.id AND tr.lang = 'zh' AND tr.revision >= a.revision
+    LEFT JOIN translations tr ON tr.article_id = a.id AND tr.lang = ${SITE_LANG} AND tr.revision >= a.revision
     WHERE a.id = ${articleId}`;
   if (!row) return null;
   return {
@@ -71,34 +71,34 @@ export async function loadAnalyzeInput(articleId: string): Promise<AnalyzeInputA
 }
 
 const KIND_LABEL: Record<string, string> = {
-  rss: "RSS", web_list: "网页", json_list: "网页接口", x_search: "X 帖子", mp_account: "微信公众号", external: "外部上报",
+  rss: "RSS", web_list: "página web", json_list: "API de página web", x_search: "post do X", mp_account: "conta do WeChat", external: "envio externo",
 };
 
 /** The material as the structure step reads it (source facts, text, link). */
 export function buildMaterial(a: AnalyzeInputArticle): string {
   // Conditions often occur at the end of an announcement. Use the existing body budget instead of
   // only its lead; beyond it, state the missing tail so it is not mistaken for complete evidence.
-  const body = (text: string) => text.length <= MAX_BODY_CHARS ? text : `${text.slice(0, MAX_BODY_CHARS)}\n【原文超过 ${MAX_BODY_CHARS} 字符，后文未提供】`;
+  const body = (text: string) => text.length <= MAX_BODY_CHARS ? text : `${text.slice(0, MAX_BODY_CHARS)}\n【o original passa de ${MAX_BODY_CHARS} caracteres; o restante não foi fornecido】`;
   const lines: string[] = [];
   lines.push("<source>");
-  lines.push(`名称：${a.source.name}`);
-  lines.push(`类型：${KIND_LABEL[a.source.kind] ?? a.source.kind}；分级：${a.source.tier}；一手来源：${a.source.firstParty ? "是" : "否"}`);
+  lines.push(`Nome: ${a.source.name}`);
+  lines.push(`Tipo: ${KIND_LABEL[a.source.kind] ?? a.source.kind}; nível: ${a.source.tier}; fonte primária: ${a.source.firstParty ? "sim" : "não"}`);
   lines.push("</source>");
   lines.push("<material>");
-  if (a.publishedAt) lines.push(`发布时间：${beijingDate(a.publishedAt)} ${beijingTime(a.publishedAt)}（北京时间）`);
-  if (a.author) lines.push(`作者：${a.author}`);
+  if (a.publishedAt) lines.push(`Data de publicação: ${beijingDate(a.publishedAt)} ${beijingTime(a.publishedAt)} (horário de Brasília)`);
+  if (a.author) lines.push(`Autor: ${a.author}`);
   if (a.xPost) {
-    lines.push(`作者：${a.xPost.authorName ?? ""} (@${a.xPost.handle ?? ""})`);
-    lines.push(`帖子：\n${body(String(a.xPost.text ?? a.title))}`);
-    if (a.xPost.quoted?.text) lines.push(`引用的帖子（@${a.xPost.quoted.handle ?? ""}）：\n${body(String(a.xPost.quoted.text))}`);
-    if (a.translationZh) lines.push(`帖子中文译文：\n${truncate(a.translationZh, 4000)}`);
+    lines.push(`Autor: ${a.xPost.authorName ?? ""} (@${a.xPost.handle ?? ""})`);
+    lines.push(`Post:\n${body(String(a.xPost.text ?? a.title))}`);
+    if (a.xPost.quoted?.text) lines.push(`Post citado (@${a.xPost.quoted.handle ?? ""}):\n${body(String(a.xPost.quoted.text))}`);
+    if (a.translationZh) lines.push(`Tradução do post para o português:\n${truncate(a.translationZh, 4000)}`);
   } else {
-    lines.push(`标题：${collapseWhitespace(a.title)}`);
+    lines.push(`Título: ${collapseWhitespace(a.title)}`);
     const original = a.bodyText ?? a.excerpt ?? "";
-    lines.push(original ? `正文：\n${body(original)}` : "正文：（无）");
-    if (a.translationZh && !a.bodyText) lines.push(`正文中文译文：\n${truncate(a.translationZh, 5000)}`);
+    lines.push(original ? `Corpo:\n${body(original)}` : "Corpo: (nenhum)");
+    if (a.translationZh && !a.bodyText) lines.push(`Tradução do corpo para o português:\n${truncate(a.translationZh, 5000)}`);
   }
-  lines.push(`原文链接：${a.url}`);
+  lines.push(`Link do original: ${a.url}`);
   lines.push("</material>");
   return lines.join("\n");
 }

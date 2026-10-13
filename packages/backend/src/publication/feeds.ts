@@ -6,9 +6,9 @@ import { feedCategoryLabel, PUBLIC_API_CATEGORY_KEYS, toPublicApiCategory, type 
 import { EDITION_WHEN, FEED_COPY, REPORTS, SITE, subjectAfter } from "@aihot/site";
 import { config } from "../config.ts";
 import { sql } from "../db.ts";
-import { escapeXml } from "../lib/text.ts";
+import { escapeXml, SITE_LANG } from "../lib/text.ts";
 import { proxyBodyImages } from "../media/imgproxy.ts";
-import { feedIssues, type FeedIssue, type ReportKind } from "./reports.ts";
+import { DAILY_ISSUE_NAME, feedIssues, PERIOD_ISSUE_NAMES, type FeedIssue, type ReportKind } from "./reports.ts";
 import { textToHtml } from "../content/sanitize.ts";
 import type { FeedNotice } from "../modules.ts";
 import { publicCategoryCondition, exportTranslation, xView, type ItemRow } from "./items.ts";
@@ -29,15 +29,15 @@ interface FeedMeta {
 const CACHE = { edgeCacheSeconds: 300 };
 
 /** What the all feed leaves out: what the site names (FEED_COPY), then what the engine always leaves out. */
-const LEFT_OUT = [...FEED_COPY.allLeavesOut, "未审内容", "低相关条目", "已合并重复条目"];
+const LEFT_OUT = [...FEED_COPY.allLeavesOut, "conteúdo ainda não avaliado", "itens de baixa relevância", "duplicatas já mescladas"];
 
 const FEEDS: FeedMeta[] = [
-  { id: "selected", path: "/feed.xml", title: `${SITE.name} — 精选`, description: `最新 50 条 ${SITE.name} 精选摘要，保留标题、站内阅读与原文入口；需要阅读器内全文可改订 /feed/full.xml。`, homePath: "/", pollHintMinutes: 30, ...CACHE },
-  { id: "selected-full", path: "/feed/full.xml", title: `${SITE.name} — 精选全文`, description: "与精选摘要相同的最新 50 条；仅对明确允许再分发的来源内联正文，其余仍提供摘要和阅读入口。", homePath: "/", pollHintMinutes: 30, ...CACHE },
-  { id: "all", path: "/feed/all.xml", title: `${SITE.name} — ${subjectAfter("全部", "动态")}`, description: `最近 7 天公开动态，按真实发布时间倒序；不含${LEFT_OUT.slice(0, -1).join("、")}和${LEFT_OUT.at(-1)}。`, homePath: "/all", pollHintMinutes: 30, ...CACHE },
-  { id: "daily", path: "/feed/daily.xml", title: `${SITE.name} 日报`, description: `${SITE.name} ${EDITION_WHEN.daily}（北京时间）发布的精编日报，保留最近 30 期。`, homePath: "/daily", pollHintMinutes: 30, ...CACHE },
-  { id: "weekly", path: "/feed/weekly.xml", title: `${SITE.name} 周报`, description: `${SITE.name} ${EDITION_WHEN.weekly}（北京时间）发布的周报：从上周每天的日报里选出的${REPORTS.entry.noun}，按栏目分好，附总述；保留最近 12 期。`, homePath: "/weekly", pollHintMinutes: 180, ...CACHE },
-  { id: "monthly", path: "/feed/monthly.xml", title: `${SITE.name} 月报`, description: `${SITE.name} ${EDITION_WHEN.monthly}（北京时间）发布的月报：从上个月每天的日报里选出的${REPORTS.entry.noun}，按栏目分好，附总述；保留最近 12 期。`, homePath: "/monthly", pollHintMinutes: 360, ...CACHE },
+  { id: "selected", path: "/feed.xml", title: `${SITE.name} — Seleção`, description: `Os 50 itens mais recentes da Seleção do ${SITE.name}, em resumo, com título, link para leitura no site e para o original; para ler o texto completo no leitor de RSS, assine /feed/full.xml.`, homePath: "/", pollHintMinutes: 30, ...CACHE },
+  { id: "selected-full", path: "/feed/full.xml", title: `${SITE.name} — Seleção (texto completo)`, description: "Os mesmos 50 itens mais recentes da Seleção; o texto completo vem embutido só para fontes que autorizam explicitamente a redistribuição, as demais trazem resumo e link para leitura.", homePath: "/", pollHintMinutes: 30, ...CACHE },
+  { id: "all", path: "/feed/all.xml", title: `${SITE.name} — Todas as notícias`, description: `Todas as notícias públicas dos últimos 7 dias, das mais recentes para as mais antigas pela data real de publicação; não inclui ${LEFT_OUT.slice(0, -1).join(", ")} nem ${LEFT_OUT.at(-1)}.`, homePath: "/all", pollHintMinutes: 30, ...CACHE },
+  { id: "daily", path: "/feed/daily.xml", title: `${SITE.name} — Briefing diário`, description: `O Briefing diário do ${SITE.name}, publicado ${EDITION_WHEN.daily} (horário de Brasília); mantém as 30 edições mais recentes.`, homePath: "/daily", pollHintMinutes: 30, ...CACHE },
+  { id: "weekly", path: "/feed/weekly.xml", title: `${SITE.name} — Briefing semanal`, description: `O Briefing semanal do ${SITE.name}, publicado ${EDITION_WHEN.weekly} (horário de Brasília): os ${REPORTS.entry.noun} escolhidos dos briefings diários da semana anterior, divididos por seção, com uma apresentação; mantém as 12 edições mais recentes.`, homePath: "/weekly", pollHintMinutes: 180, ...CACHE },
+  { id: "monthly", path: "/feed/monthly.xml", title: `${SITE.name} — Briefing mensal`, description: `O Briefing mensal do ${SITE.name}, publicado ${EDITION_WHEN.monthly} (horário de Brasília): os ${REPORTS.entry.noun} escolhidos dos briefings diários do mês anterior, divididos por seção, com uma apresentação; mantém as 12 edições mais recentes.`, homePath: "/monthly", pollHintMinutes: 360, ...CACHE },
 ];
 
 /** A feed by its id; a category feed shares the poll hint and caching of the feed it narrows. */
@@ -80,7 +80,7 @@ function channel(meta: { title: string; description: string; homePath: string; s
     <title>${escapeXml(meta.title)}</title>
     <link>${escapeXml(siteUrl(meta.homePath))}</link>
     <description>${escapeXml(meta.description)}</description>
-    <language>zh-CN</language>
+    <language>${escapeXml(SITE.locale)}</language>
     <atom:link href="${escapeXml(siteUrl(meta.selfPath))}" rel="self" type="application/rss+xml" />
     <ttl>${meta.ttl}</ttl>
     <generator>${escapeXml(`${SITE.name} (${siteUrl("/agent")})`)}</generator>
@@ -99,8 +99,8 @@ type FeedRow = Pick<ItemRow, "id" | "title" | "summary" | "url" | "category" | "
 const FEED_IMAGE_SECONDS = 7 * 86400;
 
 /**
- * The body a full feed carries, in Chinese when the page has it: an X post's translation (with the post
- * it quotes, translated too), else a complete Chinese translation of the article, else the original. It
+ * The body a full feed carries, in the site's language when the page has it: an X post's translation (with
+ * the post it quotes, translated too), else a complete translation of the article, else the original. It
  * ends with an attribution line (also a mark on copies taken from the feed).
  */
 function fullContent(r: FeedRow, aihot: string): string | null {
@@ -109,26 +109,26 @@ function fullContent(r: FeedRow, aihot: string): string | null {
   if (x) {
     html = textToHtml(x.translation ?? x.text);
     if (x.quoted?.text) {
-      html += `<blockquote><p>引用 @${escapeXml(x.quoted.handle)}：</p>${textToHtml(x.quoted.translation ?? x.quoted.text)}${x.quoted.url ? `<p><a href="${escapeXml(x.quoted.url)}">${escapeXml(x.quoted.url)}</a></p>` : ""}</blockquote>`;
+      html += `<blockquote><p>Citando @${escapeXml(x.quoted.handle)}:</p>${textToHtml(x.quoted.translation ?? x.quoted.text)}${x.quoted.url ? `<p><a href="${escapeXml(x.quoted.url)}">${escapeXml(x.quoted.url)}</a></p>` : ""}</blockquote>`;
     }
     for (const media of r.x_post?.media ?? []) {
       const url = String(media.url ?? "");
       if (!/^https?:\/\//i.test(url)) continue;
       html += media.kind === "video"
-        ? `<p><a href="${escapeXml(url)}">视频</a></p>`
+        ? `<p><a href="${escapeXml(url)}">Vídeo</a></p>`
         : `<p><img src="${escapeXml(url)}" alt="${escapeXml(String(media.alt ?? ""))}"></p>`;
     }
   } else if (r.body_html) {
     html = exportTranslation(r) ?? r.body_html;
   }
   if (!html) return null;
-  return `${proxyBodyImages(html, true, FEED_IMAGE_SECONDS)}<p>—— 本文由 ${escapeXml(SITE.name)} 聚合整理，完整版与${escapeXml(subjectAfter("更多", "动态"))}见 <a href="${aihot}">${aihot}</a></p>`;
+  return `${proxyBodyImages(html, true, FEED_IMAGE_SECONDS)}<p>— Reunido e organizado pelo ${escapeXml(SITE.name)}; a versão completa e ${escapeXml(subjectAfter("mais", "notícias"))} em <a href="${aihot}">${aihot}</a></p>`;
 }
 
 function itemXml(r: FeedRow, includeContent: boolean): string {
   const aihot = itemUrl(r.id);
   const summary = r.summary ?? "";
-  const description = `<p>${escapeXml(summary)}</p>\n<p>🔗 <a href="${escapeXml(r.url)}">阅读原文</a></p>\n<p>via ${escapeXml(SITE.name)} · <a href="${aihot}">${aihot}</a></p>`;
+  const description = `<p>${escapeXml(summary)}</p>\n<p>🔗 <a href="${escapeXml(r.url)}">Ler o original</a></p>\n<p>via ${escapeXml(SITE.name)} · <a href="${aihot}">${aihot}</a></p>`;
   const publicCategory = toPublicApiCategory(r.category);
   const category = publicCategory ? `\n      <category>${escapeXml(feedCategoryLabel(publicCategory))}</category>` : "";
   let content = "";
@@ -172,7 +172,7 @@ export async function itemFeed(kind: ItemFeedKind, category: PublicApiCategoryKe
         left(a.body_text, 400) AS body_text, a.body_html, tr.body_html AS tr_html, tr.complete AS tr_complete` : sql``}
     FROM page JOIN publications p ON p.article_id = page.article_id JOIN sources s ON s.id = p.source_id
     ${includeContent ? sql`LEFT JOIN articles a ON a.id = p.article_id AND p.syndicate
-      LEFT JOIN translations tr ON tr.article_id = p.article_id AND tr.lang = 'zh' AND tr.revision >= a.revision
+      LEFT JOIN translations tr ON tr.article_id = p.article_id AND tr.lang = ${SITE_LANG} AND tr.revision >= a.revision
       LEFT JOIN quote_translations qt ON p.channel = 'x' AND qt.tweet_id = substring(a.x_post->'quoted'->>'url' from '/status/([0-9]+)')` : sql``}
     ORDER BY coalesce(p.published_at, p.discovered_at) DESC, p.article_id DESC`;
   const m = feedMeta(kind);
@@ -180,10 +180,10 @@ export async function itemFeed(kind: ItemFeedKind, category: PublicApiCategoryKe
   if (category) {
     const label = feedCategoryLabel(category);
     meta = {
-      title: includeContent ? `${SITE.name} — ${label}全文` : `${SITE.name} — ${label}`,
+      title: includeContent ? `${SITE.name} — ${label} (texto completo)` : `${SITE.name} — ${label}`,
       description: includeContent
-        ? `${SITE.name} 每日精选「${label}」分类全文源。仅对明确允许再分发的来源内联正文。`
-        : `${SITE.name} 每日精选里「${label}」这一类的摘要，按分类订阅、不被全量精选刷屏。`,
+        ? `Feed com texto completo da categoria "${label}" da Seleção diária do ${SITE.name}. O texto vem embutido só para fontes que autorizam explicitamente a redistribuição.`
+        : `Resumos da categoria "${label}" da Seleção diária do ${SITE.name}: assine por categoria, sem receber a Seleção inteira.`,
       homePath: "/",
       selfPath: includeContent ? `/feed/full/category/${category}.xml` : `/feed/category/${category}.xml`,
       ttl: m.pollHintMinutes,
@@ -195,14 +195,14 @@ export async function itemFeed(kind: ItemFeedKind, category: PublicApiCategoryKe
   return channel(meta, items);
 }
 
-const ISSUE_NAME: Record<ReportKind, string> = { daily: "日报", weekly: "周报", monthly: "月报" };
+const ISSUE_NAME: Record<ReportKind, string> = { daily: DAILY_ISSUE_NAME, ...PERIOD_ISSUE_NAMES };
 /** Issues each report feed keeps: a month of dailies, a quarter of weeklies, a year of monthlies. */
 const ISSUES_KEPT: Record<ReportKind, number> = { daily: 30, weekly: 12, monthly: 12 };
 
 /** One issue: its headline, its lead (a weekly's or monthly's overview) and its contents, each entry linking to its page. */
 function issueXml(kind: ReportKind, r: FeedIssue): string {
   const url = kind === "daily" ? dailyUrl(r.key) : periodUrl(kind, r.key);
-  const name = `${SITE.name} ${ISSUE_NAME[kind]}`;
+  const name = `${SITE.name} · ${ISSUE_NAME[kind]}`;
   const title = r.headline ? `${name} · ${r.key} — ${r.headline}` : `${name} · ${r.key}`;
   const contents = r.sections.map((s) => `<p><strong>${escapeXml(s.label)}</strong></p>\n<ul>${s.items.map((i) => `<li><a href="${escapeXml(i.link)}">${escapeXml(i.title)}</a></li>`).join("")}</ul>`);
   const description = [`<p>${escapeXml(r.leadParagraph ?? r.headline ?? "")}</p>`, ...contents, `<p>via ${escapeXml(SITE.name)} · <a href="${url}">${url}</a></p>`].join("\n");

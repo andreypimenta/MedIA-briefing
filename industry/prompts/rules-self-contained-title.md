@@ -1,10 +1,10 @@
 
-【标题自洽规则 — 让读者不点开就知道"这是关于谁的什么事"】
+【Regra de título autossuficiente — o leitor sabe "de quem e do quê se trata" sem abrir】
 
-1. 标题必须点出核心主体：模型名 / 产品名 / 公司名 / 项目名。
-2. 原标题已经清楚点出主体的：英文标题翻译成中文、中文标题保持原意，不要为改写而改写。
-3. 原标题只是版本号 / 代号 / 没信息量的 teaser（如 "v2.1.159"、"Small is a feature"、"Day 1"、"重磅发布"）时，结合【来源】和正文把主体补进标题。例：原标题 "v2.1.159" + 来源 "Claude Code：GitHub Releases" → "Claude Code v2.1.159 发布"。
-4. 补主体只能用【来源】或正文里真实出现的名字。正文和来源都没点出具体型号时，用上位词（如"开源多模态模型"）兜底，绝不凭"行业常识"编一个具体型号 / 版本 / 数字。
-5. 原标题表达的【文章类型和核心动作】是硬边界：How / Why / Guide / Analysis / Review / Benchmark 这类解释、分析、教程或评测标题，中文标题必须保留这个类型；不能因为正文谈到一个已经存在的模型、产品或新数据，就改写成“发布 / 推出 / 上线 / 开源”。只有原标题明确宣布了发布、推出、上线或开源，中文标题才能使用对应动作。保留文章类型不等于删主体：仍须按第 1-4 条补全正文或来源明确给出的公司、产品、项目名。
-   例：原标题 "How GPT-5.6 fuses frontier intelligence with frontier efficiency" → "GPT-5.6 如何兼顾前沿智能与效率"，不能写成 "OpenAI 发布 GPT-5.6"。
-   例：原标题 "How to build interactive experiences with canvases" + 来源和正文明确是 GitHub Copilot → "GitHub Copilot 如何用 canvases 构建交互体验"，不能只写成缺主体的 "如何用 canvases 构建交互体验"。
+1. O título tem de nomear o sujeito central: nome do modelo / produto / empresa / instituição / órgão regulador / estudo.
+2. Se o título original já nomeia claramente o sujeito: título em outra língua é traduzido para o português; título em português mantém o sentido original; não reescreva só por reescrever.
+3. Se o título original é só número de versão / codinome / teaser sem informação (como "v2.1.159", "Small is a feature", "Day 1", "Grande novidade"), complete o sujeito no título usando a 【Fonte】 e o corpo. Exemplo: título original "v2.1.159" + fonte "Abridge: Release notes" → "Abridge lança a versão 2.1.159".
+4. O sujeito só pode ser completado com nomes que aparecem de fato na 【Fonte】 ou no corpo. Se nem o corpo nem a fonte citam o modelo ou produto específico, use um termo genérico (como "ferramenta de IA para radiologia" ou "modelo de linguagem médico") e nunca invente modelo / versão / número com base em "conhecimento do setor".
+5. O 【tipo de texto e a ação central】 expressos pelo título original são um limite rígido: títulos de explicação, análise, guia ou avaliação como How / Why / Guide / Analysis / Review / Benchmark / Commentary precisam manter esse tipo no título em português; não reescreva como "lança / aprova / publica / disponibiliza" só porque o corpo fala de um modelo, produto ou dado já existente. Só use a ação correspondente se o título original anunciar claramente lançamento, aprovação, disponibilização ou publicação. Manter o tipo de texto não significa apagar o sujeito: continue completando, pelas regras 1-4, a empresa, o produto ou a instituição que o corpo ou a fonte indicam claramente. O mesmo vale para estudos: um título sobre associação ou avaliação não vira "IA reduz mortalidade" se o original não afirma isso.
+   Exemplo: título original "How an AI sepsis model performed across 12 hospitals" → "Como um modelo de IA para sepse se saiu em 12 hospitais", e não "Hospitais adotam IA que reduz mortes por sepse".
+   Exemplo: título original "How to write prompts for clinical documentation" + fonte e corpo deixam claro que é o DAX Copilot → "Como escrever prompts para documentação clínica no DAX Copilot", e não só "Como escrever prompts para documentação clínica", sem sujeito.

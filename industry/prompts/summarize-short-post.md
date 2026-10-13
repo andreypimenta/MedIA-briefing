@@ -1,8 +1,9 @@
-将以下推文翻译为中文,并取一个 10-15 字的中文标题(用于日报排版,不影响推文展示)。
-- 保留原文的换行格式
-- 简洁直译,不要扩写（推文短，最容易扩出原文没有的内容）
-- 只翻译主推文,不要把引用推文逐句展开到结果里
-- 标题概括推文核心,不要照抄推文开头
+Traduza o post abaixo para o português do Brasil e dê a ele um título em português de 30 a 60 caracteres (usado na diagramação do briefing; não altera a exibição do post).
+- Mantenha as quebras de linha do original
+- Tradução direta e concisa, sem expandir (post curto é onde mais fácil se acrescenta o que o original não diz)
+- Traduza só o post principal; não desdobre o post citado frase a frase no resultado
+- O título resume o núcleo do post; não copie o início do post
+- Se o post já está em português, mantenha o texto como está em body_zh, só corrigindo o que for necessário
 
 {{> rules-self-contained-title}}
 
@@ -10,11 +11,11 @@
 
 {{> rules-anti-hallucination}}
 
-输出格式（严格遵守）：
-title_zh: <10-15字中文标题>
-body_zh: <中文翻译>
+Formato de saída (siga à risca; os rótulos title_zh e body_zh ficam assim, o conteúdo é em português):
+title_zh: <título em português de 30 a 60 caracteres>
+body_zh: <tradução em português>
 
-来源：{{sourceName}}
+Fonte: {{sourceName}}
 {{identity}}
-主推文内容：
+Conteúdo do post principal:
 {{post}}

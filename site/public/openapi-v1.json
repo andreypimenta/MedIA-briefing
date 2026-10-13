@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "{{siteName}} Public API",
+    "title": "API pública do {{siteName}}",
     "version": "{{version}}",
-    "description": "Anonymous, read-only API for clients and Agents. No API key is required.\n\nPicking an endpoint: answer a person's question inside an AI agent -> read /api/v1/agent, which lists Markdown addresses made for agents. Show recent or today's items -> /api/v1/items. Show what is trending right now -> /api/v1/hot-topics. Show the daily digest -> /api/v1/dailies/latest; the weekly and monthly reports -> /api/v1/weeklies/latest and /api/v1/monthlies/latest. Keep a complete local copy of the selected set -> /api/v1/selected/snapshot once, then /api/v1/selected/changes forever.\n\nHow often to poll: use each response's Cache-Control s-maxage as the minimum interval, and always send If-None-Match: an unchanged resource answers 304 with an empty body. On 429 or 503, honour Retry-After. There is no push channel (no SSE, webhooks or streaming): poll on an interval.\n\nKeep responses small: send Accept-Encoding: gzip or br (curl --compressed). To follow new items, page back only until you reach an id you already have instead of re-reading the whole 7-day window on every poll; to keep every selected item, read /api/v1/selected/snapshot once and then only /api/v1/selected/changes.\n\nReport dates, weeks and months identify fixed editions, but corrections and withdrawn citations can change their public content. Revalidate retained copies with If-None-Match after Cache-Control expires; do not treat a dated report as immutable.\n\nTitles and summaries are generated from third-party sources; the original is always linked in links.original.",
+    "description": "API anônima e somente de leitura para clientes e agentes. Não é preciso API key.\n\nEscolhendo o endpoint: responder à pergunta de alguém dentro de um agente de IA -> leia /api/v1/agent, que lista endereços em Markdown feitos para agentes. Mostrar itens recentes ou de hoje -> /api/v1/items. Mostrar o que está em alta agora -> /api/v1/hot-topics. Mostrar o briefing diário -> /api/v1/dailies/latest; os briefings semanal e mensal -> /api/v1/weeklies/latest e /api/v1/monthlies/latest. Manter uma cópia local completa da seleção -> /api/v1/selected/snapshot uma vez, depois /api/v1/selected/changes para sempre.\n\nFrequência de consulta: use o s-maxage do Cache-Control de cada resposta como intervalo mínimo e sempre envie If-None-Match: um recurso que não mudou responde 304 com corpo vazio. Em 429 ou 503, respeite o Retry-After. Não há canal de push (nem SSE, webhooks ou streaming): consulte em intervalos.\n\nMantenha as respostas pequenas: envie Accept-Encoding: gzip ou br (curl --compressed). Para acompanhar itens novos, volte páginas só até encontrar um id que você já tem, em vez de reler a janela inteira de 7 dias a cada consulta; para guardar todos os itens selecionados, leia /api/v1/selected/snapshot uma vez e depois apenas /api/v1/selected/changes.\n\nDatas, semanas e meses dos briefings identificam edições fixas, mas correções e citações retiradas podem mudar seu conteúdo público. Revalide as cópias guardadas com If-None-Match depois que o Cache-Control expirar; não trate um briefing datado como imutável.\n\nTítulos e resumos são gerados a partir de fontes de terceiros; o original está sempre em links.original.",
     "termsOfService": "{{siteUrl}}/terms"
   },
   "servers": [
@@ -12,15 +12,15 @@
     }
   ],
   "externalDocs": {
-    "description": "Machine-readable OpenAPI document",
+    "description": "Documento OpenAPI legível por máquina",
     "url": "{{siteUrl}}/openapi-v1.json"
   },
   "paths": {
     "/api/v1/items": {
       "get": {
         "operationId": "items",
-        "summary": "List recent public AI items",
-        "description": "Start here for feeds, widgets and 'what is new' views. Covers the last 7 days only. Send If-None-Match and you get a 304 with an empty body whenever nothing changed. To follow new items, page back with cursor only until you reach an id you already have. Do not use this to maintain a complete local copy of the selected set: it is windowed, so anything older than 7 days silently falls out. Use /api/v1/selected/snapshot plus /api/v1/selected/changes for that.",
+        "summary": "Listar itens públicos recentes de IA em medicina",
+        "description": "Comece por aqui para feeds, widgets e telas de \"o que há de novo\". Cobre apenas os últimos 7 dias. Envie If-None-Match e receba 304 com corpo vazio sempre que nada mudou. Para acompanhar itens novos, volte páginas com cursor só até encontrar um id que você já tem. Não use este endpoint para manter uma cópia local completa da seleção: ele tem janela, então tudo o que tiver mais de 7 dias sai sem aviso. Para isso, use /api/v1/selected/snapshot mais /api/v1/selected/changes.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -48,7 +48,7 @@
               "examples": [
                 "{{categories}}"
               ],
-              "description": "Current values: {{categoryList}}."
+              "description": "Valores atuais: {{categoryList}}."
             }
           },
           {
@@ -74,7 +74,7 @@
               ],
               "default": "timeline"
             },
-            "description": "Which timestamp defines the window and ordering. 'timeline' (default) matches the site's published timeline: historical or backfilled items can retain their source publication time, including items first found more than 72h after publication; ordinary new items use discovery time, and selected representatives follow their reading group's first appearance. 'published' uses source publication time, falling back to discovery time when it is unknown. publishedAt may be null when the original time is unknown; discoveredAt is the site's receipt time. These returned fields are not client-side cursor or sort keys; pass the returned cursor unchanged."
+            "description": "Qual horário define a janela e a ordenação. 'timeline' (padrão) segue a linha do tempo publicada no site: itens históricos ou importados depois podem manter o horário de publicação da fonte, inclusive itens encontrados mais de 72h após a publicação; itens novos comuns usam o horário de descoberta, e os representantes selecionados seguem a primeira aparição do seu grupo de leitura. 'published' usa o horário de publicação da fonte e, quando ele é desconhecido, o de descoberta. publishedAt pode ser null quando o horário original é desconhecido; discoveredAt é o horário em que o site recebeu o item. Esses campos não servem como cursor nem como chave de ordenação no cliente; repasse o cursor retornado sem alterá-lo."
           },
           {
             "name": "q",
@@ -84,7 +84,7 @@
               "minLength": 2,
               "maxLength": 200
             },
-            "description": "Leading and trailing whitespace is removed before validation; the remaining value must contain 2 to 200 Unicode code points."
+            "description": "Espaços no início e no fim são removidos antes da validação; o valor restante deve ter de 2 a 200 code points Unicode."
           },
           {
             "name": "limit",
@@ -102,7 +102,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Opaque, query-bound keyset cursor for the rolling window. It carries no issue time and does not expire on a timer, but the window keeps moving: once the cursor's own anchor has dropped out of the requested 24h or 7d window it is rejected with invalid_cursor, so restart the query from the first page instead of persisting a cursor across days. Older rows may also naturally leave the window between requests. Use selected snapshot + changes for an exact mirror."
+            "description": "Cursor opaco de paginação por chave, ligado à consulta, para a janela móvel. Não carrega horário de emissão e não expira com o tempo, mas a janela continua andando: quando a âncora do próprio cursor sai da janela pedida de 24h ou 7d, ele é rejeitado com invalid_cursor; nesse caso recomece a consulta pela primeira página em vez de guardar um cursor de um dia para o outro. Linhas mais antigas também podem sair naturalmente da janela entre uma chamada e outra. Para uma cópia exata, use selected snapshot + changes."
           }
         ],
         "responses": {
@@ -129,7 +129,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -144,10 +144,10 @@
             }
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -162,10 +162,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -180,10 +180,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -198,16 +198,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -223,16 +223,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -253,8 +253,8 @@
     "/api/v1/hot-topics": {
       "get": {
         "operationId": "hotTopics",
-        "summary": "List current multi-source hot topics",
-        "description": "The current {{siteName}} Top 10, ranked by multi-source coverage and discussion heat. Each item includes a one-based rank; internal and display heat values are not returned. Uses the latest successfully published ranking, normally refreshed every five minutes. Shared caches use a 60s freshness window; poll no faster than s-maxage and use If-None-Match. If an item includes links.story, it is a human-facing HTML URL: extract its final publicId path segment and call /api/v1/stories/{publicId} for timeline JSON. Never request links.story as an API. When absent, do not construct a story id.",
+        "summary": "Listar os assuntos em alta, cobertos por várias fontes",
+        "description": "O Top 10 atual do {{siteName}}, ordenado pela cobertura em várias fontes e pela repercussão. Cada item traz a posição (a partir de 1); os valores internos e exibidos de repercussão não são devolvidos. Usa o último ranking publicado com sucesso, normalmente atualizado a cada cinco minutos. Caches compartilhados usam janela de validade de 60s; não consulte mais rápido que o s-maxage e use If-None-Match. Se um item tiver links.story, trata-se de uma URL HTML para pessoas: extraia o último segmento do caminho (publicId) e chame /api/v1/stories/{publicId} para obter a linha do tempo em JSON. Nunca peça links.story como API. Quando ausente, não invente um id de evento.",
         "responses": {
           "200": {
             "description": "OK",
@@ -279,7 +279,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -294,10 +294,10 @@
             }
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -312,10 +312,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -330,10 +330,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -348,16 +348,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -373,16 +373,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -411,8 +411,8 @@
     "/api/v1/stories/{publicId}": {
       "get": {
         "operationId": "storyByPublicId",
-        "summary": "Get a story (event) with its coverage timeline and AI digest",
-        "description": "One story = one real-world event aggregated from every covering source: a reverse-chronological coverage timeline, an AI digest that is rewritten incrementally as the event evolves (contradictions with earlier reporting are stated explicitly), and links to same-storyline and related stories. Extract ids from the final path segment of a hot-topics links.story HTML URL, or use ids from another story's storyline/related refs; never request links.story as JSON. Merged stories answer with a 308 to the surviving id. Call this endpoint only with an id actually returned by the API; a 404 means the public story layer or that story is unavailable.",
+        "summary": "Obter um evento com a linha do tempo da cobertura e o panorama gerado por IA",
+        "description": "Um evento = um fato do mundo real reunido a partir de todas as fontes que o cobriram: uma linha do tempo da cobertura em ordem cronológica inversa, um panorama gerado por IA reescrito aos poucos conforme o fato evolui (contradições com notícias anteriores são apontadas explicitamente) e links para eventos da mesma história e relacionados. Extraia os ids do último segmento do caminho da URL HTML em links.story dos assuntos em alta, ou use os ids das referências storyline/related de outro evento; nunca peça links.story como JSON. Eventos fundidos respondem com 308 para o id que permaneceu. Chame este endpoint apenas com um id realmente devolvido pela API; um 404 significa que a camada pública de eventos ou aquele evento não está disponível.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -454,7 +454,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -469,13 +469,13 @@
             }
           },
           "308": {
-            "description": "Story was merged into another; follow Location to the surviving story id."
+            "description": "O evento foi fundido com outro; siga o Location até o id que permaneceu."
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -490,10 +490,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -508,10 +508,10 @@
             }
           },
           "404": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -526,10 +526,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -544,16 +544,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -569,16 +569,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -599,8 +599,8 @@
     "/api/v1/dailies": {
       "get": {
         "operationId": "dailies",
-        "summary": "List daily-report archive entries",
-        "description": "Date index of past daily reports, newest first. Reports are published once a day at {{dailyTime}} Asia/Shanghai, so checking this more than a few times a day is wasted work.",
+        "summary": "Listar o arquivo de briefings diários",
+        "description": "Índice de datas dos briefings diários anteriores, do mais recente para o mais antigo. Os briefings saem uma vez por dia às {{dailyTime}} (horário de Brasília), então consultar mais do que algumas vezes por dia é trabalho desperdiçado.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -643,7 +643,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -658,10 +658,10 @@
             }
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -676,10 +676,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -694,10 +694,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -712,16 +712,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -737,16 +737,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -767,8 +767,8 @@
     "/api/v1/dailies/latest": {
       "get": {
         "operationId": "latestDaily",
-        "summary": "Get the latest daily report",
-        "description": "The most recent daily report, published once a day at {{dailyTime}} Asia/Shanghai. A client that only wants the daily digest should wake up shortly after {{dailyTime}} rather than poll around the clock. Agent or tool runtimes that cache a stable URL beyond HTTP cache headers should first request /api/v1/dailies?limit=1 and then fetch /api/v1/dailies/{returned-date}; never guess a date.",
+        "summary": "Obter o briefing diário mais recente",
+        "description": "O briefing diário mais recente, publicado uma vez por dia às {{dailyTime}} (horário de Brasília). Um cliente que só quer o briefing diário deve acordar logo depois das {{dailyTime}} em vez de consultar o dia inteiro. Agentes ou ferramentas que guardam uma URL estável além dos cabeçalhos de cache HTTP devem primeiro pedir /api/v1/dailies?limit=1 e depois buscar /api/v1/dailies/{data-retornada}; nunca adivinhe uma data.",
         "responses": {
           "200": {
             "description": "OK",
@@ -793,7 +793,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -808,10 +808,10 @@
             }
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -826,10 +826,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -844,10 +844,10 @@
             }
           },
           "404": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -862,10 +862,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -880,16 +880,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -905,16 +905,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -943,8 +943,8 @@
     "/api/v1/dailies/{date}": {
       "get": {
         "operationId": "dailyByDate",
-        "summary": "Get a daily report by Shanghai calendar date",
-        "description": "A single past daily report by Asia/Shanghai calendar date (YYYY-MM-DD). Each date identifies a fixed edition, but corrections and withdrawn citations can change its public content. Respect Cache-Control and revalidate with If-None-Match before reusing an expired copy; do not cache a report indefinitely.",
+        "summary": "Obter um briefing diário pela data (horário de Brasília)",
+        "description": "Um briefing diário anterior pela data no horário de Brasília (AAAA-MM-DD). Cada data identifica uma edição fixa, mas correções e citações retiradas podem mudar seu conteúdo público. Respeite o Cache-Control e revalide com If-None-Match antes de reutilizar uma cópia expirada; não guarde um briefing em cache indefinidamente.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -986,7 +986,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -1001,10 +1001,10 @@
             }
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1019,10 +1019,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1037,10 +1037,10 @@
             }
           },
           "404": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1055,10 +1055,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1073,16 +1073,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -1098,16 +1098,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -1128,8 +1128,8 @@
     "/api/v1/weeklies": {
       "get": {
         "operationId": "weeklies",
-        "summary": "List weekly reports",
-        "description": "Index of published weekly reports, newest first: ISO week, its Monday-to-Sunday days, headline and {{siteName}} link. A weekly is published each Monday at {{weeklyTime}} Asia/Shanghai, compiled from the dailies dated in that week, so checking more than once a day is wasted work.",
+        "summary": "Listar os briefings semanais",
+        "description": "Índice dos briefings semanais publicados, do mais recente para o mais antigo: semana ISO, seus dias de segunda a domingo, manchete e link no {{siteName}}. O semanal sai toda segunda-feira às {{weeklyTime}} (horário de Brasília), montado a partir dos briefings diários daquela semana, então consultar mais de uma vez por dia é trabalho desperdiçado.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -1172,7 +1172,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -1187,10 +1187,10 @@
             }
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1205,10 +1205,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1223,10 +1223,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1241,16 +1241,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -1266,16 +1266,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -1296,8 +1296,8 @@
     "/api/v1/weeklies/latest": {
       "get": {
         "operationId": "latestWeekly",
-        "summary": "Get the latest weekly report",
-        "description": "The most recent weekly report: its headline, overview and the week's most important items grouped by section, chosen from that week's dailies. Published each Monday at {{weeklyTime}} Asia/Shanghai; a client that wants the weekly digest should fetch it shortly after that rather than poll. Agent or tool runtimes that cache a stable URL beyond HTTP cache headers should first request /api/v1/weeklies?limit=1 and then /api/v1/weeklies/{returned-week}; never guess a week.",
+        "summary": "Obter o briefing semanal mais recente",
+        "description": "O briefing semanal mais recente: manchete, panorama e os itens mais importantes da semana agrupados por seção, escolhidos entre os briefings diários daquela semana. Publicado toda segunda-feira às {{weeklyTime}} (horário de Brasília); um cliente que quer o briefing semanal deve buscá-lo logo depois disso em vez de consultar o tempo todo. Agentes ou ferramentas que guardam uma URL estável além dos cabeçalhos de cache HTTP devem primeiro pedir /api/v1/weeklies?limit=1 e depois /api/v1/weeklies/{semana-retornada}; nunca adivinhe uma semana.",
         "responses": {
           "200": {
             "description": "OK",
@@ -1322,7 +1322,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -1337,10 +1337,10 @@
             }
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1355,10 +1355,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1373,10 +1373,10 @@
             }
           },
           "404": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1391,10 +1391,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1409,16 +1409,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -1434,16 +1434,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -1472,8 +1472,8 @@
     "/api/v1/weeklies/{week}": {
       "get": {
         "operationId": "weeklyByWeek",
-        "summary": "Get a weekly report by ISO week",
-        "description": "A single weekly report by ISO week label (YYYY-Www, for example 2026-W39). Corrections and withdrawn citations can change the public content of this edition. Respect Cache-Control and revalidate with If-None-Match before reusing an expired copy; do not cache a report indefinitely.",
+        "summary": "Obter um briefing semanal pela semana ISO",
+        "description": "Um briefing semanal pela semana ISO (AAAA-Wss, por exemplo 2026-W39). Correções e citações retiradas podem mudar o conteúdo público desta edição. Respeite o Cache-Control e revalide com If-None-Match antes de reutilizar uma cópia expirada; não guarde um briefing em cache indefinidamente.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -1489,7 +1489,7 @@
               "type": "string",
               "pattern": "^\\d{4}-W\\d{2}$"
             },
-            "description": "ISO week label, e.g. 2026-W39."
+            "description": "Semana ISO, por exemplo 2026-W39."
           }
         ],
         "responses": {
@@ -1516,7 +1516,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -1531,10 +1531,10 @@
             }
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1549,10 +1549,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1567,10 +1567,10 @@
             }
           },
           "404": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1585,10 +1585,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1603,16 +1603,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -1628,16 +1628,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -1658,8 +1658,8 @@
     "/api/v1/monthlies": {
       "get": {
         "operationId": "monthlies",
-        "summary": "List monthly reports",
-        "description": "Index of published monthly reports, newest first: month, its first and last day, headline and {{siteName}} link. A monthly is published on the 1st of each month at {{monthlyTime}} Asia/Shanghai, compiled from the dailies dated in that month.",
+        "summary": "Listar os briefings mensais",
+        "description": "Índice dos briefings mensais publicados, do mais recente para o mais antigo: mês, primeiro e último dia, manchete e link no {{siteName}}. O mensal sai todo dia 1º às {{monthlyTime}} (horário de Brasília), montado a partir dos briefings diários daquele mês.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -1702,7 +1702,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -1717,10 +1717,10 @@
             }
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1735,10 +1735,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1753,10 +1753,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1771,16 +1771,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -1796,16 +1796,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -1826,8 +1826,8 @@
     "/api/v1/monthlies/latest": {
       "get": {
         "operationId": "latestMonthly",
-        "summary": "Get the latest monthly report",
-        "description": "The most recent monthly report: its headline, overview and the month's most important items grouped by section, chosen from that month's dailies. Published on the 1st of each month at {{monthlyTime}} Asia/Shanghai. Tool runtimes that cache a stable URL should first request /api/v1/monthlies?limit=1 and then /api/v1/monthlies/{returned-month}; never guess a month.",
+        "summary": "Obter o briefing mensal mais recente",
+        "description": "O briefing mensal mais recente: manchete, panorama e os itens mais importantes do mês agrupados por seção, escolhidos entre os briefings diários daquele mês. Publicado todo dia 1º às {{monthlyTime}} (horário de Brasília). Ferramentas que guardam uma URL estável devem primeiro pedir /api/v1/monthlies?limit=1 e depois /api/v1/monthlies/{mes-retornado}; nunca adivinhe um mês.",
         "responses": {
           "200": {
             "description": "OK",
@@ -1852,7 +1852,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -1867,10 +1867,10 @@
             }
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1885,10 +1885,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1903,10 +1903,10 @@
             }
           },
           "404": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1921,10 +1921,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -1939,16 +1939,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -1964,16 +1964,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -2002,8 +2002,8 @@
     "/api/v1/monthlies/{month}": {
       "get": {
         "operationId": "monthlyByMonth",
-        "summary": "Get a monthly report by month",
-        "description": "A single monthly report by calendar month (YYYY-MM, for example 2026-09). Corrections and withdrawn citations can change the public content of this edition. Respect Cache-Control and revalidate with If-None-Match before reusing an expired copy.",
+        "summary": "Obter um briefing mensal pelo mês",
+        "description": "Um briefing mensal pelo mês do calendário (AAAA-MM, por exemplo 2026-09). Correções e citações retiradas podem mudar o conteúdo público desta edição. Respeite o Cache-Control e revalide com If-None-Match antes de reutilizar uma cópia expirada.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -2019,7 +2019,7 @@
               "type": "string",
               "pattern": "^\\d{4}-\\d{2}$"
             },
-            "description": "Calendar month, e.g. 2026-09."
+            "description": "Mês do calendário, por exemplo 2026-09."
           }
         ],
         "responses": {
@@ -2046,7 +2046,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -2061,10 +2061,10 @@
             }
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -2079,10 +2079,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -2097,10 +2097,10 @@
             }
           },
           "404": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -2115,10 +2115,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -2133,16 +2133,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -2158,16 +2158,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -2188,8 +2188,8 @@
     "/api/v1/selected/snapshot": {
       "get": {
         "operationId": "selectedSnapshot",
-        "summary": "Fetch the current selected-item snapshot, one page at a time",
-        "description": "One-time bootstrap for clients that keep a complete local copy of the selected set. Not a browsing endpoint and not something to poll: page through it once with limit (default 500, max 1000) until hasMore is false, keep the cursor from the FIRST page, then stay current with /api/v1/selected/changes. The full set runs to several thousand items and only grows; fields=minimal keeps the bootstrap small. A widget that just shows today's picks does not need this at all — use /api/v1/items.",
+        "summary": "Buscar o retrato atual da seleção, uma página por vez",
+        "description": "Carga inicial, feita uma única vez, para clientes que mantêm uma cópia local completa da seleção. Não é um endpoint de navegação nem algo para consultar periodicamente: percorra as páginas uma vez com limit (padrão 500, máximo 1000) até hasMore ser false, guarde o cursor da PRIMEIRA página e depois mantenha-se atualizado com /api/v1/selected/changes. O conjunto completo chega a vários milhares de itens e só cresce; fields=minimal mantém a carga inicial pequena. Um widget que só mostra os destaques de hoje não precisa disso — use /api/v1/items.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -2208,7 +2208,7 @@
               ],
               "default": "default"
             },
-            "description": "'minimal' drops summary and the original-article link, cutting the payload roughly 4x. Prefer it when you only need to know which items are currently selected. On continuation pages the value is locked by the page cursor, so a mirror can never end up half default and half minimal."
+            "description": "'minimal' remove o resumo e o link do original, reduzindo a resposta em cerca de 4 vezes. Prefira quando só precisa saber quais itens estão selecionados no momento. Nas páginas seguintes o valor fica travado pelo cursor da página, então uma cópia nunca termina metade no padrão e metade em minimal."
           },
           {
             "name": "limit",
@@ -2226,7 +2226,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Opaque continuation cursor from the previous response's nextPage. Keep requesting pages while hasMore is true; only after the last page should you use cursor against /api/v1/selected/changes. The sync cursor is identical on every page and always refers to the watermark taken on the first page, so items changed mid-pagination are reconciled by the first changes call."
+            "description": "Cursor opaco de continuação vindo do nextPage da resposta anterior. Continue pedindo páginas enquanto hasMore for true; só depois da última página use o cursor em /api/v1/selected/changes. O cursor de sincronização é igual em todas as páginas e sempre se refere à marca d'água tirada na primeira página, então itens alterados durante a paginação são acertados na primeira chamada de changes."
           }
         ],
         "responses": {
@@ -2253,7 +2253,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -2268,10 +2268,10 @@
             }
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -2286,10 +2286,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -2304,10 +2304,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -2322,10 +2322,10 @@
             }
           },
           "409": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -2340,16 +2340,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -2365,16 +2365,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -2395,8 +2395,8 @@
     "/api/v1/selected/changes": {
       "get": {
         "operationId": "selectedChanges",
-        "summary": "Fetch atomic selected-item changes",
-        "description": "Adds, edits and removals since your cursor, so a local copy stays correct without re-downloading anything. Apply a page, then save the returned cursor — never the other way round. The cursor is a ledger watermark, not a session: it does not expire on a timer, so a client may go offline for days and resume exactly where it stopped. On 409 snapshot_required, re-bootstrap from /api/v1/selected/snapshot; that response is the only signal that resuming is no longer safe.",
+        "summary": "Buscar as mudanças atômicas da seleção",
+        "description": "Inclusões, edições e remoções desde o seu cursor, para que uma cópia local continue correta sem baixar tudo de novo. Aplique a página e só depois salve o cursor retornado — nunca o contrário. O cursor é uma marca d'água do registro de mudanças, não uma sessão: não expira com o tempo, então um cliente pode ficar dias offline e retomar exatamente de onde parou. Ao receber 409 snapshot_required, refaça a carga inicial por /api/v1/selected/snapshot; essa resposta é o único sinal de que retomar deixou de ser seguro.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -2447,7 +2447,7 @@
             }
           },
           "304": {
-            "description": "Not Modified",
+            "description": "Não modificado",
             "headers": {
               "ETag": {
                 "schema": {
@@ -2462,10 +2462,10 @@
             }
           },
           "400": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -2480,10 +2480,10 @@
             }
           },
           "403": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -2498,10 +2498,10 @@
             }
           },
           "405": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -2516,10 +2516,10 @@
             }
           },
           "409": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
@@ -2534,16 +2534,16 @@
             }
           },
           "429": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -2559,16 +2559,16 @@
             }
           },
           "503": {
-            "description": "Machine-readable problem response.",
+            "description": "Resposta de erro legível por máquina.",
             "headers": {
               "X-Request-Id": {
-                "description": "Support correlation identifier for this failed request.",
+                "description": "Identificador de correlação desta requisição com falha, para o suporte.",
                 "schema": {
                   "type": "string"
                 }
               },
               "Retry-After": {
-                "description": "Minimum number of seconds to wait before retrying.",
+                "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
                 "schema": {
                   "type": "integer",
                   "minimum": 1
@@ -2589,8 +2589,8 @@
     "/api/v1/agent": {
       "get": {
         "operationId": "agentGuide",
-        "summary": "Usage guide for AI agents",
-        "description": "Markdown that tells an AI agent which /api/v1/agent address answers which kind of question, how to present results and the usage rules. Agents read these addresses and never need updating: new abilities are added here as new addresses.",
+        "summary": "Guia de uso para agentes de IA",
+        "description": "Markdown que diz a um agente de IA qual endereço de /api/v1/agent responde a cada tipo de pergunta, como apresentar os resultados e quais são as regras de uso. Os agentes leem esses endereços e não precisam ser atualizados: novos recursos entram aqui como novos endereços.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -2627,8 +2627,8 @@
     "/api/v1/agent/latest": {
       "get": {
         "operationId": "agentLatest",
-        "summary": "Latest items as an agent answer",
-        "description": "The same items as /api/v1/items (timeline order), rendered for an agent to relay: titles linked to {{siteName}}, source, Beijing time, summary and reason. Defaults to the editorial picks of the past 24 hours, 10 items.",
+        "summary": "Itens mais recentes, como resposta para agente",
+        "description": "Os mesmos itens de /api/v1/items (na ordem da linha do tempo), formatados para um agente repassar: títulos com link para o {{siteName}}, fonte, horário de Brasília, resumo e \"Por que ler\". Por padrão, a seleção editorial das últimas 24 horas, 10 itens.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -2709,8 +2709,8 @@
     "/api/v1/agent/search": {
       "get": {
         "operationId": "agentSearch",
-        "summary": "Search as an agent answer",
-        "description": "Searches the editorial picks first and, only when they have nothing, every public item, and says which. Defaults to the latest 7 days.",
+        "summary": "Busca, como resposta para agente",
+        "description": "Busca primeiro na seleção editorial e, só quando não há resultado, em todos os itens públicos, informando qual dos dois usou. Por padrão, últimos 7 dias.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -2789,8 +2789,8 @@
     "/api/v1/agent/hot": {
       "get": {
         "operationId": "agentHot",
-        "summary": "Current hot topics as an agent answer",
-        "description": "The current Top 10 by rank, each with the address of its story answer. No heat values.",
+        "summary": "Os assuntos em alta agora, como resposta para agente",
+        "description": "O Top 10 atual por posição, cada um com o endereço da resposta do seu evento. Sem valores de repercussão.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -2837,8 +2837,8 @@
     "/api/v1/agent/stories/{publicId}": {
       "get": {
         "operationId": "agentStory",
-        "summary": "A story's timeline as an agent answer",
-        "description": "Latest development, AI digest, reports from newest to oldest and related stories. Only use addresses given by /api/v1/agent/hot or another story answer.",
+        "summary": "A linha do tempo de um evento, como resposta para agente",
+        "description": "Último desdobramento, panorama gerado por IA, notícias da mais recente para a mais antiga e eventos relacionados. Use apenas endereços fornecidos por /api/v1/agent/hot ou por outra resposta de evento.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -2897,7 +2897,7 @@
     "/api/v1/agent/daily": {
       "get": {
         "operationId": "agentLatestDaily",
-        "summary": "The latest daily report as an agent answer",
+        "summary": "O briefing diário mais recente, como resposta para agente",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -2937,8 +2937,8 @@
     "/api/v1/agent/daily/{date}": {
       "get": {
         "operationId": "agentDaily",
-        "summary": "A dated daily report as an agent answer",
-        "description": "A real YYYY-MM-DD date; a date without a report is 404, never another day's report.",
+        "summary": "Um briefing diário de uma data, como resposta para agente",
+        "description": "Uma data real no formato AAAA-MM-DD; uma data sem briefing retorna 404, nunca o briefing de outro dia.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -2987,7 +2987,7 @@
     "/api/v1/agent/weekly": {
       "get": {
         "operationId": "agentWeekly",
-        "summary": "The latest weekly report as an agent answer",
+        "summary": "O briefing semanal mais recente, como resposta para agente",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -3022,14 +3022,14 @@
             "$ref": "#/components/responses/Unavailable"
           }
         },
-        "description": "The most recent weekly report in Chinese Markdown: headline, overview and the week's most important items by section, with answering hints."
+        "description": "O briefing semanal mais recente em Markdown, em português: manchete, panorama e os itens mais importantes da semana por seção, com dicas de resposta."
       }
     },
     "/api/v1/agent/weekly/{week}": {
       "get": {
         "operationId": "agentWeeklyByWeek",
-        "summary": "A weekly report as an agent answer",
-        "description": "A real ISO week such as 2026-W39; a week without a report is 404, never another week's report.",
+        "summary": "Um briefing semanal, como resposta para agente",
+        "description": "Uma semana ISO real, como 2026-W39; uma semana sem briefing retorna 404, nunca o briefing de outra semana.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -3045,7 +3045,7 @@
               "type": "string",
               "pattern": "^\\d{4}-W\\d{2}$"
             },
-            "description": "ISO week label, e.g. 2026-W39."
+            "description": "Semana ISO, por exemplo 2026-W39."
           }
         ],
         "responses": {
@@ -3079,7 +3079,7 @@
     "/api/v1/agent/monthly": {
       "get": {
         "operationId": "agentMonthly",
-        "summary": "The latest monthly report as an agent answer",
+        "summary": "O briefing mensal mais recente, como resposta para agente",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -3114,14 +3114,14 @@
             "$ref": "#/components/responses/Unavailable"
           }
         },
-        "description": "The most recent monthly report in Chinese Markdown: headline, overview and the month's most important items by section, with answering hints."
+        "description": "O briefing mensal mais recente em Markdown, em português: manchete, panorama e os itens mais importantes do mês por seção, com dicas de resposta."
       }
     },
     "/api/v1/agent/monthly/{month}": {
       "get": {
         "operationId": "agentMonthlyByMonth",
-        "summary": "A monthly report as an agent answer",
-        "description": "A real month such as 2026-09; a month without a report is 404, never another month's report.",
+        "summary": "Um briefing mensal, como resposta para agente",
+        "description": "Um mês real, como 2026-09; um mês sem briefing retorna 404, nunca o briefing de outro mês.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ActorUserAgent"
@@ -3137,7 +3137,7 @@
               "type": "string",
               "pattern": "^\\d{4}-\\d{2}$"
             },
-            "description": "Calendar month, e.g. 2026-09."
+            "description": "Mês do calendário, por exemplo 2026-09."
           }
         ],
         "responses": {
@@ -3175,7 +3175,7 @@
         "name": "User-Agent",
         "in": "header",
         "required": false,
-        "description": "The client's normal User-Agent (optional; any value works).",
+        "description": "O User-Agent habitual do cliente (opcional; qualquer valor serve).",
         "schema": {
           "type": "string",
           "maxLength": 2048
@@ -3186,7 +3186,7 @@
         "name": "If-None-Match",
         "in": "header",
         "required": false,
-        "description": "Previously received ETag for this exact URL. A match returns 304 without a response body.",
+        "description": "ETag recebido antes para esta mesma URL. Se coincidir, a resposta é 304 sem corpo.",
         "schema": {
           "type": "string"
         }
@@ -3194,7 +3194,7 @@
     },
     "responses": {
       "AgentMarkdown": {
-        "description": "Markdown for an AI agent: a heading, the data fenced off as untrusted external content, then answer hints (回答提示). The wording may improve at any time; programs should read the JSON endpoints instead.",
+        "description": "Markdown para um agente de IA: um título, os dados isolados como conteúdo externo não confiável e, por fim, dicas de resposta. O texto pode melhorar a qualquer momento; programas devem ler os endpoints JSON.",
         "headers": {
           "ETag": {
             "schema": {
@@ -3216,7 +3216,7 @@
         }
       },
       "NotModified": {
-        "description": "Not Modified",
+        "description": "Não modificado",
         "headers": {
           "ETag": {
             "schema": {
@@ -3231,10 +3231,10 @@
         }
       },
       "BadRequest": {
-        "description": "Machine-readable problem response.",
+        "description": "Resposta de erro legível por máquina.",
         "headers": {
           "X-Request-Id": {
-            "description": "Support correlation identifier for this failed request.",
+            "description": "Identificador de correlação desta requisição com falha, para o suporte.",
             "schema": {
               "type": "string"
             }
@@ -3249,10 +3249,10 @@
         }
       },
       "Forbidden": {
-        "description": "Machine-readable problem response.",
+        "description": "Resposta de erro legível por máquina.",
         "headers": {
           "X-Request-Id": {
-            "description": "Support correlation identifier for this failed request.",
+            "description": "Identificador de correlação desta requisição com falha, para o suporte.",
             "schema": {
               "type": "string"
             }
@@ -3267,10 +3267,10 @@
         }
       },
       "NotFound": {
-        "description": "Machine-readable problem response.",
+        "description": "Resposta de erro legível por máquina.",
         "headers": {
           "X-Request-Id": {
-            "description": "Support correlation identifier for this failed request.",
+            "description": "Identificador de correlação desta requisição com falha, para o suporte.",
             "schema": {
               "type": "string"
             }
@@ -3285,10 +3285,10 @@
         }
       },
       "MethodNotAllowed": {
-        "description": "Machine-readable problem response.",
+        "description": "Resposta de erro legível por máquina.",
         "headers": {
           "X-Request-Id": {
-            "description": "Support correlation identifier for this failed request.",
+            "description": "Identificador de correlação desta requisição com falha, para o suporte.",
             "schema": {
               "type": "string"
             }
@@ -3303,16 +3303,16 @@
         }
       },
       "RateLimited": {
-        "description": "Machine-readable problem response.",
+        "description": "Resposta de erro legível por máquina.",
         "headers": {
           "X-Request-Id": {
-            "description": "Support correlation identifier for this failed request.",
+            "description": "Identificador de correlação desta requisição com falha, para o suporte.",
             "schema": {
               "type": "string"
             }
           },
           "Retry-After": {
-            "description": "Minimum number of seconds to wait before retrying.",
+            "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
             "schema": {
               "type": "integer",
               "minimum": 1
@@ -3328,16 +3328,16 @@
         }
       },
       "Unavailable": {
-        "description": "Machine-readable problem response.",
+        "description": "Resposta de erro legível por máquina.",
         "headers": {
           "X-Request-Id": {
-            "description": "Support correlation identifier for this failed request.",
+            "description": "Identificador de correlação desta requisição com falha, para o suporte.",
             "schema": {
               "type": "string"
             }
           },
           "Retry-After": {
-            "description": "Minimum number of seconds to wait before retrying.",
+            "description": "Número mínimo de segundos a esperar antes de tentar de novo.",
             "schema": {
               "type": "integer",
               "minimum": 1
@@ -3387,7 +3387,7 @@
       },
       "Attribution": {
         "type": "object",
-        "description": "Machine-readable {{siteName}} provenance for traceability. Retain it where technically feasible. Attribution alone is not authorization; see the public terms.",
+        "description": "Procedência legível por máquina do {{siteName}}, para rastreabilidade. Mantenha-a sempre que for tecnicamente viável. Citar a fonte, por si só, não é autorização; veja os termos de uso públicos.",
         "required": [
           "name",
           "url"
@@ -3483,7 +3483,7 @@
             "examples": [
               "{{categories}}"
             ],
-            "description": "Current values: {{categoryList}}. Clients must tolerate future string values."
+            "description": "Valores atuais: {{categoryList}}. Os clientes devem tolerar novos valores no futuro."
           },
           "score": {
             "type": [
@@ -3501,7 +3501,7 @@
               "string",
               "null"
             ],
-            "description": "Reader-facing recommendation reason, the same text shown as 推荐理由 on the website. Always present on /api/v1/items; null when the item is not selected or has no reader-facing reason. Selected snapshot and changes do not include this field yet."
+            "description": "Motivo de leitura voltado ao leitor, o mesmo texto exibido como \"Por que ler\" no site. Sempre presente em /api/v1/items; null quando o item não está selecionado ou não tem esse texto. O snapshot e o changes da seleção ainda não incluem este campo."
           },
           "attribution": {
             "$ref": "#/components/schemas/Attribution"
@@ -3570,7 +3570,7 @@
             "examples": [
               "{{categories}}"
             ],
-            "description": "Current values: {{categoryList}}. Clients must tolerate future string values."
+            "description": "Valores atuais: {{categoryList}}. Os clientes devem tolerar novos valores no futuro."
           },
           "score": {
             "type": [
@@ -3596,7 +3596,7 @@
           "count": {
             "type": "integer",
             "minimum": 0,
-            "description": "Number of records in this page."
+            "description": "Número de registros nesta página."
           },
           "hasMore": {
             "type": "boolean"
@@ -3606,7 +3606,7 @@
               "string",
               "null"
             ],
-            "description": "Opaque; only reuse with the same query."
+            "description": "Opaco; reutilize apenas com a mesma consulta."
           }
         }
       },
@@ -3648,7 +3648,7 @@
                 "examples": [
                   "{{categories}}"
                 ],
-                "description": "Current values: {{categoryList}}. Clients must tolerate future string values."
+                "description": "Valores atuais: {{categoryList}}. Os clientes devem tolerar novos valores no futuro."
               },
               "window": {
                 "type": "string",
@@ -3710,7 +3710,7 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 10,
-            "description": "One-based position in the current {{siteName}} Top 10 response."
+            "description": "Posição (a partir de 1) no Top 10 atual do {{siteName}}."
           },
           "id": {
             "type": "string"
@@ -3747,7 +3747,7 @@
               "story": {
                 "type": "string",
                 "format": "uri",
-                "description": "Optional human-facing HTML URL. Extract its final publicId path segment and call /api/v1/stories/{publicId} for JSON; never request this URL as an API. Do not construct story ids when absent."
+                "description": "URL HTML opcional, para pessoas. Extraia o último segmento do caminho (publicId) e chame /api/v1/stories/{publicId} para obter JSON; nunca peça esta URL como API. Quando ausente, não invente ids de evento."
               }
             }
           },
@@ -3762,7 +3762,7 @@
           "participantCount": {
             "type": "integer",
             "minimum": 0,
-            "description": "Distinct observed actors, unioned across editorial and signal sources; not a platform-wide population estimate."
+            "description": "Participantes distintos observados, somando fontes editoriais e de repercussão; não é uma estimativa de público em toda a internet."
           },
           "sourceNames": {
             "type": "array",
@@ -3840,7 +3840,7 @@
           "publishedAt": {
             "type": "string",
             "format": "date-time",
-            "description": "When the original was published; if the original carries no reliable publication date, when it was collected instead."
+            "description": "Quando o original foi publicado; se o original não tiver data de publicação confiável, quando foi coletado."
           },
           "links": {
             "type": "object",
@@ -4246,7 +4246,7 @@
                 "publishedAt": {
                   "type": "string",
                   "format": "date-time",
-                  "description": "When the original was published; if the original carries no reliable publication date, when it was collected instead."
+                  "description": "Quando o original foi publicado; se o original não tiver data de publicação confiável, quando foi coletado."
                 },
                 "attribution": {
                   "$ref": "#/components/schemas/Attribution"
@@ -4501,7 +4501,7 @@
               "null"
             ],
             "format": "date",
-            "description": "First calendar day the issue covers (Asia/Shanghai)."
+            "description": "Primeiro dia do calendário coberto pela edição (horário de Brasília)."
           },
           "periodEnd": {
             "type": [
@@ -4509,7 +4509,7 @@
               "null"
             ],
             "format": "date",
-            "description": "Last calendar day the issue covers (Asia/Shanghai)."
+            "description": "Último dia do calendário coberto pela edição (horário de Brasília)."
           },
           "generatedAt": {
             "type": "string",
@@ -4520,7 +4520,7 @@
               "string",
               "null"
             ],
-            "description": "The issue's lead: its most important item's title, or once that item is withdrawn the next one still public (older issues may carry their own headline)."
+            "description": "A manchete da edição: o título do item mais importante ou, se ele for retirado, o do próximo ainda público (edições antigas podem ter manchete própria)."
           },
           "links": {
             "type": "object",
@@ -4553,7 +4553,7 @@
               "week": {
                 "type": "string",
                 "pattern": "^\\d{4}-W\\d{2}$",
-                "description": "ISO week label, e.g. 2026-W39."
+                "description": "Semana ISO, por exemplo 2026-W39."
               }
             }
           }
@@ -4573,7 +4573,7 @@
               "month": {
                 "type": "string",
                 "pattern": "^\\d{4}-\\d{2}$",
-                "description": "Calendar month, e.g. 2026-09."
+                "description": "Mês do calendário, por exemplo 2026-09."
               }
             }
           }
@@ -4660,7 +4660,7 @@
           "windowStart": {
             "type": "string",
             "format": "date-time",
-            "description": "Start of the dailies' windows the issue was compiled from."
+            "description": "Início das janelas dos briefings diários usados para montar a edição."
           },
           "windowEnd": {
             "type": "string",
@@ -4686,18 +4686,18 @@
               "string",
               "null"
             ],
-            "description": "The most important item's title, or once that item is withdrawn the next one still public (older issues may carry their own headline)."
+            "description": "O título do item mais importante ou, se ele for retirado, o do próximo ainda público (edições antigas podem ter manchete própria)."
           },
           "overview": {
             "type": [
               "string",
               "null"
             ],
-            "description": "A short overview of the period's main threads, written only from the items listed."
+            "description": "Um panorama curto dos principais temas do período, escrito apenas a partir dos itens listados."
           },
           "sections": {
             "type": "array",
-            "description": "Sections in reading order, each with its items in order of importance. Withdrawn items are left out.",
+            "description": "Seções na ordem de leitura, cada uma com seus itens em ordem de importância. Itens retirados ficam de fora.",
             "items": {
               "type": "object",
               "required": [
@@ -4714,7 +4714,7 @@
                     "string",
                     "null"
                   ],
-                  "description": "One or two sentences introducing the section, when there is one."
+                  "description": "Uma ou duas frases de introdução da seção, quando houver."
                 },
                 "items": {
                   "type": "array",

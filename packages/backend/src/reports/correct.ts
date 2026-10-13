@@ -4,7 +4,7 @@ import { RELEASE } from "@aihot/industry/taxonomy";
 import type { Tx } from "../db.ts";
 import { isRelease } from "../editorial/vocabulary.ts";
 import { emit } from "../modules.ts";
-import { SECTION_ORDER, sectionOf } from "./edition.ts";
+import { ROLE_OFFICIAL, ROLE_OFFICIAL_X, SECTION_ORDER, sectionOf } from "./edition.ts";
 
 interface Entry { itemId: string; followUp?: string; firstParty?: boolean; role?: string; [key: string]: unknown }
 interface Group { label?: string; heading?: string; summary?: unknown; items?: Entry[]; storyRefs?: Entry[]; [key: string]: unknown }
@@ -49,7 +49,7 @@ export async function correctReportClassification(tx: Tx, articleId: string, rea
         const byId = new Map(rows.map(r => [r.article_id, r]));
         content.metrics = { ...content.metrics, modelsReleased: entries.filter(e => {
           const p = byId.get(e.itemId);
-          return p && isRelease(p.category, p.tags) && !e.followUp && (e.firstParty || e.role === "官方" || e.role === "X·官方");
+          return p && isRelease(p.category, p.tags) && !e.followUp && (e.firstParty || e.role === ROLE_OFFICIAL || e.role === ROLE_OFFICIAL_X);
         }).length };
       }
     } else content.themes = arranged;

@@ -104,17 +104,41 @@ export function escapeXml(s: string): string {
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
 }
 
-/** Share of CJK characters among letters; used to decide whether a title needs translation. */
-export function cjkRatio(s: string): number {
-  const letters = s.match(/[\p{L}]/gu) ?? [];
-  if (letters.length === 0) return 0;
-  const cjk = s.match(/[㐀-鿿豈-﫿]/g) ?? [];
-  return cjk.length / letters.length;
+/** The site's language: what readers read and what foreign material is translated into (translations.lang). */
+export const SITE_LANG = "pt";
+
+/** Words Portuguese writes and Spanish, English, French and Italian (almost) never do. */
+const PT_WORDS = new Set([
+  "não", "também", "são", "você", "vocês", "uma", "umas", "um", "uns", "é", "com", "em", "da", "das", "dos", "na", "nas", "no", "nos",
+  "ao", "aos", "à", "às", "pelo", "pela", "pelos", "pelas", "isso", "isto", "então", "já", "foi", "seu", "sua", "seus", "suas",
+  "mais", "os", "estão", "até", "após", "ainda", "muito", "muita", "novo", "nova", "novos", "novas", "pode", "podem", "sobre", "entre", "como", "mas",
+]);
+/** Common words of the languages most often confused with it (Spanish, English, French, Italian). */
+const FOREIGN_WORDS = new Set([
+  "el", "los", "del", "y", "es", "una", "un", "con", "en", "lo", "muy", "nuevo", "nueva", "también", "está", "hay", "pero", "sus", "las", "al",
+  "the", "and", "of", "for", "with", "to", "is", "are", "in", "on", "that", "this", "by", "from", "new", "at", "its", "an",
+  "le", "les", "des", "et", "est", "du", "une", "pour", "dans", "avec", "il", "di", "della", "per", "gli", "che", "non", "è",
+]);
+/** Portuguese by its spelling: nasal and circumflex vowels (-ção, -ões, câncer, ciência, também), -ça/-ço endings. */
+const PT_SPELLING = /[ãõâêô]|.ç(?:ão|ões|as?|os?)$/u;
+/** Spanish by its spelling: ñ, -ción/-ciones, the ue diphthong of nuevo/puede/tiene/fuente. */
+const ES_SPELLING = /ñ|ci[oó]n(?:es)?$|^(?:nue|pue|tie|fue|cue|bue)/u;
+
+/**
+ * Whether a text reads as Portuguese: more of its words are only Portuguese (não, também, uma, com,
+ * em, da, -ção, câncer…) than Spanish, English, French or Italian (el, una, con, the, les, che…), and
+ * enough of them to carry a short title. Links and handles are left out; a text without words is not.
+ */
+export function looksPortuguese(s: string): boolean {
+  const words = s.replace(/https?:\/\/\S+|[@#][\p{L}\p{N}_]+/gu, " ").toLowerCase().split(/[^\p{L}]+/u).filter(Boolean);
+  if (!words.length) return false;
+  const foreign = words.filter((w) => FOREIGN_WORDS.has(w) || ES_SPELLING.test(w)).length;
+  const pt = words.filter((w) => !FOREIGN_WORDS.has(w) && !ES_SPELLING.test(w) && (PT_WORDS.has(w) || PT_SPELLING.test(w))).length;
+  return pt > foreign && pt / words.length >= (words.length <= 12 ? 0.08 : 0.1);
 }
 
-export function guessLanguage(s: string): "zh" | "en" | "other" {
-  const ratio = cjkRatio(s);
-  if (ratio > 0.3) return "zh";
-  if (/[a-z]/i.test(s)) return "en";
-  return "other";
+/** Already in the site's language: the source says so (pt, pt-BR, pt-PT), or, with no language given, its text reads so. */
+export function isSiteLanguage(language: string | null | undefined, sample: string): boolean {
+  if (language?.trim()) return language.trim().toLowerCase().startsWith(SITE_LANG);
+  return looksPortuguese(sample.slice(0, 600));
 }

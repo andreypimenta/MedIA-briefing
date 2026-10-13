@@ -13,10 +13,10 @@ const WORKER_DOWN: Finding = {
   key: "worker",
   level: "now",
   owner: true,
-  title: "后台处理服务停了，网站不会出现新内容",
-  impact: "新内容的采集、处理、推送和日报全部暂停，网站停在旧内容上",
-  heals: "系统自动重启没有成功",
-  action: "尽快发起一次维护处理",
+  title: "O serviço de processamento parou; o site não vai receber conteúdo novo",
+  impact: "Coleta, processamento, envios e Briefing diário estão todos parados; o site fica com o conteúdo antigo",
+  heals: "Não, o reinício automático não funcionou",
+  action: "Abra uma manutenção o quanto antes",
 };
 
 /**
@@ -39,7 +39,7 @@ export async function checkWorkerHeartbeat(): Promise<void> {
     let tell = false;
     let msg: { title: string; lines: string[] } | null = null;
     if (stale) {
-      const down: Finding = { ...WORKER_DOWN, detail: `worker 心跳停在 ${beijingStamp(hb.updated_at)}；${ALERTS.workerLogs}`, since: hb.updated_at };
+      const down: Finding = { ...WORKER_DOWN, detail: `o heartbeat do worker parou em ${beijingStamp(hb.updated_at)}; ${ALERTS.workerLogs}`, since: hb.updated_at };
       const r = responder();
       const handed = r ? await r.raise(down, now) : down;
       tell = told || !!handed;

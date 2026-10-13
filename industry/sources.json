@@ -1,6 +1,316 @@
 {
-  "$comment": "示范信源：首次启动时导入（scripts/seed.ts），已存在的不会被覆盖。之后在后台“信源”里新建、修改和暂停。字段说明见 docs/customize.md。",
+  "$comment": "Fontes de exemplo: importadas na primeira inicialização (scripts/seed.ts); as que já existem não são sobrescritas. Depois, crie, edite e pause fontes em \"Fontes\" no Painel. Campos descritos em docs/customize.md.",
   "sources": [
+    {
+      "id": "rss-npj-digital-medicine",
+      "name": "npj Digital Medicine",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.nature.com/npjdigitalmed.rss",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "periódico"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-nature-medicine-ml",
+      "name": "Nature Medicine · Machine learning",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.nature.com/subjects/machine-learning/nm.rss",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "periódico"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-jmir-ai",
+      "name": "JMIR AI",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://ai.jmir.org/feed/atom",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "periódico"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-jmir",
+      "name": "Journal of Medical Internet Research",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "http://feeds.feedburner.com/JMedInternetRes",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "periódico"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-jmir-medical-informatics",
+      "name": "JMIR Medical Informatics",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "http://feeds.feedburner.com/JMIRMedInform",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "periódico"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-plos-digital-health",
+      "name": "PLOS Digital Health",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://journals.plos.org/digitalhealth/feed/atom",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "periódico"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-bmj-health-care-informatics",
+      "name": "BMJ Health & Care Informatics",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://informatics.bmj.com/rss/current.xml",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "periódico"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-medrxiv-health-informatics",
+      "name": "medRxiv · Health Informatics",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://connect.medrxiv.org/medrxiv_xml.php?subject=health_informatics",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 180,
+      "tags": [
+        "preprint"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-medrxiv-radiology",
+      "name": "medRxiv · Radiology and Imaging",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://connect.medrxiv.org/medrxiv_xml.php?subject=radiology_and_imaging",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 180,
+      "tags": [
+        "preprint",
+        "radiologia"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-fda-press",
+      "name": "FDA · Press Releases",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "fda",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "oficial",
+        "regulação"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-ema-news",
+      "name": "EMA · News",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.ema.europa.eu/en/news.xml",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "ema",
+      "participation_mode": "editorial",
+      "interval_minutes": 180,
+      "tags": [
+        "oficial",
+        "regulação"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-onc-blog",
+      "name": "ASTP/ONC · Health IT Buzz",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://feeds.feedburner.com/healthitbuzzblog",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "oficial",
+        "regulação"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-google-health",
+      "name": "Google · Health",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://blog.google/technology/health/rss/",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "google",
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "oficial",
+        "empresa"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-google-research-health",
+      "name": "Google Research · Health & Bioscience",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://research.google/blog/rss/",
+        "allowCategories": [
+          "Health & Bioscience"
+        ],
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "google",
+      "participation_mode": "editorial",
+      "interval_minutes": 180,
+      "tags": [
+        "oficial",
+        "pesquisa"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-nvidia-healthcare",
+      "name": "NVIDIA Blog · Healthcare",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://blogs.nvidia.com/blog/tag/healthcare-life-sciences/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T1",
+      "owner_entity_id": "nvidia",
+      "participation_mode": "editorial",
+      "interval_minutes": 180,
+      "tags": [
+        "oficial",
+        "empresa"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
     {
       "id": "rss-openai-news",
       "name": "OpenAI News",
@@ -16,201 +326,18 @@
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "官方"
+        "oficial",
+        "empresa"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-google-deepmind",
-      "name": "Google DeepMind",
+      "id": "rss-stat-health-tech",
+      "name": "STAT · Health Tech",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://deepmind.google/blog/rss.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "owner_entity_id": "google",
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-google-research",
-      "name": "Google Research",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://research.google/blog/rss/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "owner_entity_id": "google",
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方",
-        "研究"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-hugging-face",
-      "name": "Hugging Face Blog",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://huggingface.co/blog/feed.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "owner_entity_id": "hugging-face",
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方",
-        "开源"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-microsoft-research",
-      "name": "Microsoft Research",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://www.microsoft.com/en-us/research/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "owner_entity_id": "microsoft",
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方",
-        "研究"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-nvidia-blog",
-      "name": "NVIDIA Blog",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://blogs.nvidia.com/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "owner_entity_id": "nvidia",
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-aws-ml",
-      "name": "AWS Machine Learning Blog",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://aws.amazon.com/blogs/machine-learning/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方",
-        "教程"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-github-ai",
-      "name": "GitHub Blog · AI & ML",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://github.blog/ai-and-ml/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-mistral",
-      "name": "Mistral AI",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://mistral.ai/news/rss",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-bair",
-      "name": "Berkeley AI Research",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://bair.berkeley.edu/blog/feed.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 180,
-      "tags": [
-        "研究"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-the-verge-ai",
-      "name": "The Verge · AI",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+        "feedUrl": "https://www.statnews.com/category/health-tech/feed/",
         "_aihot": {
           "initialBackfillLimit": 8
         }
@@ -220,17 +347,17 @@
       "participation_mode": "editorial",
       "interval_minutes": 60,
       "tags": [
-        "媒体"
+        "imprensa"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-techcrunch-ai",
-      "name": "TechCrunch · AI",
+      "id": "rss-mobihealthnews",
+      "name": "MobiHealthNews",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "feedUrl": "https://www.mobihealthnews.com/feed",
         "_aihot": {
           "initialBackfillLimit": 8
         }
@@ -240,17 +367,17 @@
       "participation_mode": "editorial",
       "interval_minutes": 60,
       "tags": [
-        "媒体"
+        "imprensa"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-ars-technica-ai",
-      "name": "Ars Technica · AI",
+      "id": "rss-healthcare-it-news",
+      "name": "Healthcare IT News",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://arstechnica.com/ai/feed/",
+        "feedUrl": "https://www.healthcareitnews.com/content-feed/all",
         "_aihot": {
           "initialBackfillLimit": 8
         }
@@ -260,17 +387,37 @@
       "participation_mode": "editorial",
       "interval_minutes": 60,
       "tags": [
-        "媒体"
+        "imprensa"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-mit-tech-review-ai",
-      "name": "MIT Technology Review · AI",
+      "id": "rss-medcity-news",
+      "name": "MedCity News",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
+        "feedUrl": "https://medcitynews.com/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 60,
+      "tags": [
+        "imprensa"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-healthcare-dive-health-it",
+      "name": "Healthcare Dive · Health IT",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.healthcaredive.com/feeds/topic/health-it/",
         "_aihot": {
           "initialBackfillLimit": 8
         }
@@ -280,37 +427,17 @@
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "媒体"
+        "imprensa"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-the-decoder",
-      "name": "The Decoder",
+      "id": "rss-medtech-dive",
+      "name": "MedTech Dive",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://the-decoder.com/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T2",
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 60,
-      "tags": [
-        "媒体"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-simon-willison",
-      "name": "Simon Willison",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://simonwillison.net/atom/everything/",
+        "feedUrl": "https://www.medtechdive.com/feeds/news/",
         "_aihot": {
           "initialBackfillLimit": 8
         }
@@ -320,17 +447,99 @@
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "个人"
+        "imprensa"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-import-ai",
-      "name": "Import AI",
+      "id": "rss-hit-consultant",
+      "name": "HIT Consultant",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://importai.substack.com/feed",
+        "feedUrl": "https://hitconsultant.net/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 60,
+      "tags": [
+        "imprensa"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-healthcare-it-today",
+      "name": "Healthcare IT Today",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.healthcareittoday.com/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "imprensa"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-auntminnie",
+      "name": "AuntMinnie",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.auntminnie.com/rss",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 60,
+      "tags": [
+        "imprensa",
+        "radiologia"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-radiology-business",
+      "name": "Radiology Business",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://radiologybusiness.com/rss.xml",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 60,
+      "tags": [
+        "imprensa",
+        "radiologia"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-medical-futurist",
+      "name": "The Medical Futurist",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://medicalfuturist.com/feed/",
         "_aihot": {
           "initialBackfillLimit": 8
         }
@@ -340,18 +549,120 @@
       "participation_mode": "editorial",
       "interval_minutes": 180,
       "tags": [
-        "个人",
-        "周刊"
+        "imprensa"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-latent-space",
-      "name": "Latent Space",
+      "id": "rss-futuro-da-saude-ia",
+      "name": "Futuro da Saúde · Inteligência artificial",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://www.latent.space/feed",
+        "feedUrl": "https://futurodasaude.com.br/tag/inteligencia-artificial/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "imprensa",
+        "Brasil"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-medicina-sa",
+      "name": "Medicina S/A",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://medicinasa.com.br/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "imprensa",
+        "Brasil"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-saude-business",
+      "name": "Saúde Business",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.saudebusiness.com/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "imprensa",
+        "Brasil"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-ground-truths",
+      "name": "Ground Truths (Eric Topol)",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://erictopol.substack.com/feed",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "newsletter"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-doctor-penguin",
+      "name": "Doctor Penguin Weekly",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://doctorpenguin.substack.com/feed",
+        "_aihot": {
+          "initialBackfillLimit": 8
+        }
+      },
+      "tier": "T2",
+      "owner_entity_id": null,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "newsletter"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-kevinmd-tech",
+      "name": "KevinMD · Health Technology",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.kevinmd.com/blog/category/tech/feed",
         "_aihot": {
           "initialBackfillLimit": 8
         }
@@ -361,7 +672,7 @@
       "participation_mode": "editorial",
       "interval_minutes": 180,
       "tags": [
-        "个人"
+        "opinião"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false

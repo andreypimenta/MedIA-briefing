@@ -68,17 +68,17 @@ export const SIGNAL_SYSTEM = promptText("group-signal");
 const RelationSchema = z.enum(RELATIONS);
 
 export const BatchSchema = z.object({
-  query: z.string().max(400).catch(""),
+  query: z.string().max(1000).catch(""),
   decisions: z
-    .array(z.object({ id: z.string().regex(/^C[1-9]\d*$/), relation: RelationSchema, confidence: z.number().min(0).max(1), note: z.string().max(400).catch("") })),
-  selection: z.object({ addsValue: z.boolean(), reason: z.string().trim().min(1).max(400) }),
+    .array(z.object({ id: z.string().regex(/^C[1-9]\d*$/), relation: RelationSchema, confidence: z.number().min(0).max(1), note: z.string().max(1000).catch("") })),
+  selection: z.object({ addsValue: z.boolean(), reason: z.string().trim().min(1).max(1000) }),
 });
 
 export const PairSchema = z.object({
-  a: z.string().max(400).catch(""),
-  b: z.string().max(400).catch(""),
+  a: z.string().max(1000).catch(""),
+  b: z.string().max(1000).catch(""),
   relation: RelationSchema,
-  difference: z.string().max(400).catch(""),
+  difference: z.string().max(1000).catch(""),
   confidence: z.number().min(0).max(1),
 });
 
@@ -87,21 +87,21 @@ export const SignalSchema = z.object({
 });
 
 function when(at: Date | null): string {
-  return at ? `${beijingDate(at)} ${beijingTime(at)}` : "未知";
+  return at ? `${beijingDate(at)} ${beijingTime(at)}` : "desconhecida";
 }
 
 export function describeReport(r: ReportView, label: string, extra = "", summaryLimit = 360): string {
   const f = r.frame;
   return [
     `【${label}】${extra}`,
-    `标题：${r.title}`,
-    `来源：${r.source}${r.firstParty ? "（当事方/官方）" : ""}｜发布时间：${when(r.at)}`,
-    `摘要：${(r.summary ?? "").slice(0, summaryLimit) || "（无）"}`,
-    r.scope && r.scope !== "unknown" ? `资料范围：${r.scope === "composite" ? "多个独立发生的综合稿" : "单一具体发生或议题"}` : null,
+    `Título: ${r.title}`,
+    `Fonte: ${r.source}${r.firstParty ? " (parte envolvida/oficial)" : ""} | Data de publicação: ${when(r.at)}`,
+    `Resumo: ${(r.summary ?? "").slice(0, summaryLimit) || "(nenhum)"}`,
+    r.scope && r.scope !== "unknown" ? `Abrangência do material: ${r.scope === "composite" ? "panorama de várias ocorrências independentes" : "uma única ocorrência ou tema concreto"}` : null,
     f && (f.subject || f.action || f.object)
-      ? `事实要素：主体=${f.subject || "?"}；动作=${f.action || "?"}；对象=${f.object || "?"}；日期=${f.occurredAt || "未知"}`
+      ? `Elementos do fato: sujeito=${f.subject || "?"}; ação=${f.action || "?"}; objeto=${f.object || "?"}; data=${f.occurredAt || "desconhecida"}`
       : null,
-    r.sourceText ? `【原文证据】\n${r.sourceText.slice(0, 6000)}\n【原文证据结束】` : null,
+    r.sourceText ? `【Evidência do texto original】\n${r.sourceText.slice(0, 6000)}\n【Fim da evidência do texto original】` : null,
   ]
     .filter(Boolean)
     .join("\n");
@@ -109,24 +109,28 @@ export function describeReport(r: ReportView, label: string, extra = "", summary
 
 export const candidateKey = (index: number) => `C${index + 1}`;
 
-export function batchUser(query: ReportView, cands: CandidateView[], queryLabel = "新报道", reading: ReadingContext[] = []): string {
+/** The query's label in a batch: a new report (with the selection judgement) or a post (identity only). */
+export const NEW_REPORT_LABEL = "Matéria nova";
+export const POST_LABEL = "Post";
+
+export function batchUser(query: ReportView, cands: CandidateView[], queryLabel = NEW_REPORT_LABEL, reading: ReadingContext[] = []): string {
   const list = cands
     .map((c, i) => [
-      describeReport(c.report, `候选 ${candidateKey(i)}`, `（该事实已有 ${c.members} 篇报道；事实标题：${c.factTitle}）`),
-      queryLabel === "新报道" ? c.selected && c.selectedReport
-        ? describeReport(c.selectedReport, "已公开精选", "（增量只与这篇已展示的内容比较）")
-        : "【尚无公开精选】该候选只用于身份判断。" : null,
+      describeReport(c.report, `Candidato ${candidateKey(i)}`, ` (este fato já tem ${c.members} ${c.members === 1 ? "matéria" : "matérias"}; título do fato: ${c.factTitle})`),
+      queryLabel === NEW_REPORT_LABEL ? c.selected && c.selectedReport
+        ? describeReport(c.selectedReport, "Seleção já publicada", " (o ganho é comparado só com este conteúdo já exibido)")
+        : "【Ainda sem Seleção publicada】Este candidato serve só para julgar identidade." : null,
     ].filter(Boolean).join("\n"))
     .join("\n\n");
   const background = reading.map(({ report, sourceText }, i) => [
-    describeReport(report, `已公开精选阅读背景 R${i + 1}`, "（只比较信息覆盖，不是事实候选）", 2000),
-    sourceText ? `【该已选报道的原文证据】\n${sourceText.slice(0, 6000)}\n【原文证据结束】` : null,
+    describeReport(report, `Contexto de leitura da Seleção já publicada R${i + 1}`, " (compare só a cobertura de informação; não é candidato a fato)", 2000),
+    sourceText ? `【Evidência do texto original desta matéria selecionada】\n${sourceText.slice(0, 6000)}\n【Fim da evidência do texto original】` : null,
   ].filter(Boolean).join("\n")).join("\n\n");
-  return `${describeReport(query, queryLabel)}\n\n${list}${background ? `\n\n${background}` : ""}\n\n${queryLabel}与每个候选的关系是什么？${background ? "同时比较所有已公开精选内容，判断新增价值；无事实候选时 decisions=[]。" : ""}`;
+  return `${describeReport(query, queryLabel)}\n\n${list}${background ? `\n\n${background}` : ""}\n\nQual é a relação entre ${queryLabel === POST_LABEL ? "o post" : "a matéria nova"} e cada candidato?${background ? " Compare também com todo o conteúdo da Seleção já publicada para julgar o ganho de informação; sem candidatos a fato, decisions=[]." : ""}`;
 }
 
 export function pairUser(a: ReportView, b: ReportView): string {
-  return `${describeReport(a, "报道 A")}\n\n${describeReport(b, "报道 B")}\n\n这两篇报道是什么关系？`;
+  return `${describeReport(a, "Matéria A")}\n\n${describeReport(b, "Matéria B")}\n\nQual é a relação entre estas duas matérias?`;
 }
 
 /** An identity answer must address every supplied candidate exactly once. */
@@ -187,7 +191,7 @@ export const STORY_REVIEW_MIN_CONFIDENCE = 0.75;
 
 /** The text a report is embedded with: title and the start of the summary, the same on both sides of a comparison. */
 export function reportText(title: string, summary: string | null | undefined): string {
-  return `${title}。${(summary ?? "").slice(0, 300)}`;
+  return `${title}. ${(summary ?? "").slice(0, 300)}`;
 }
 
 /** Lexical stand-in for cosine when embeddings are off (no embedding key): shared character bigrams. */

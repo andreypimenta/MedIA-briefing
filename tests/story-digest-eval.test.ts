@@ -48,7 +48,7 @@ const answer = (title: string, digest: string, tokens: [number, number]) => ({
 async function source(suffix: string, tier: string) {
   const id = `${key}-${suffix}`;
   await sql`INSERT INTO sources (id,name,kind,tier,participation_mode,config,first_party,next_fetch_at)
-    VALUES (${id},${`来源 ${suffix}`},'rss',${tier},'editorial',${sql.json({})},${tier === "T1"},'2100-01-01')`;
+    VALUES (${id},${`Fonte ${suffix}`},'rss',${tier},'editorial',${sql.json({})},${tier === "T1"},'2100-01-01')`;
   return id;
 }
 
@@ -56,7 +56,7 @@ async function story(title: string) {
   const [s] = await sql<{ id: number; public_id: string }[]>`
     INSERT INTO stories (public_id,title,first_report_at,latest_at) VALUES (${randomUUID()},${title},${at(100)},${at(0)}) RETURNING id, public_id::text`;
   const [f] = await sql<{ id: number }[]>`INSERT INTO facts (public_id,story_id,title,subject,action,object,conditions)
-    VALUES (${`f-${randomUUID()}`},${s!.id},${title},'Acme','发布','Atlas','仅限首批客户') RETURNING id`;
+    VALUES (${`f-${randomUUID()}`},${s!.id},${title},'Acme','lança','Atlas','só para os primeiros hospitais clientes') RETURNING id`;
   return { id: Number(s!.id), publicId: s!.public_id, factId: Number(f!.id) };
 }
 
@@ -67,12 +67,12 @@ async function report(sourceId: string, group: Awaited<ReturnType<typeof story>>
     VALUES (${id},${sourceId},${id},${`https://example.org/${id}`},${opts.title},${date},${date},${date})`;
   const [a] = await sql<{ id: number }[]>`INSERT INTO analyses (article_id,input_revision,origin,relevance,title_zh,summary_zh,score,selected,output)
     VALUES (${id},1,'rule','pass',${opts.title},${opts.title},70,true,
-      ${sql.json({ fact: { evidence: `${opts.title} 原文`, conditions: [{ text: "仅限首批客户", quote: "first customers only" }] } })}) RETURNING id`;
+      ${sql.json({ fact: { evidence: `${opts.title} original`, conditions: [{ text: "Só para os primeiros hospitais clientes", quote: "first customers only" }] } })}) RETURNING id`;
   await sql`INSERT INTO publications (article_id,analysis_id,source_id,title,summary,url,channel,first_party,timeline_at,discovered_at,published_at,sort_at,
     story_id,fact_id,selected,eligible,visible_after,tags,body_mode,score,visibility)
-    VALUES (${id},${a!.id},${sourceId},${opts.title},${`${opts.title} 的摘要`},${`https://example.org/${id}`},'news',true,${date},${date},${date},${date},
+    VALUES (${id},${a!.id},${sourceId},${opts.title},${`Resumo de ${opts.title}`},${`https://example.org/${id}`},'news',true,${date},${date},${date},${date},
     ${group.id},${group.factId},true,true,${date},${[key]},'full',70,${opts.visibility ?? "public"})`;
-  await sql`INSERT INTO fact_articles (fact_id,article_id,role,evidence) VALUES (${group.factId},${id},${opts.role ?? "report"},${`${opts.title} 的证据`})`;
+  await sql`INSERT INTO fact_articles (fact_id,article_id,role,evidence) VALUES (${group.factId},${id},${opts.role ?? "report"},${`Evidência de ${opts.title}`})`;
   return id;
 }
 
@@ -87,7 +87,7 @@ test("a case exported from an event reaches the model exactly as the site's own 
   // An empty title keeps the event's title, so later steps read the same event the export read.
   const provider = await stub((_hit, req) => {
     bodies.push(req.body);
-    return answer("", "Acme 已向首批客户开放 Atlas 有限测试。", [100, 20]);
+    return answer("", "A Acme abriu um teste limitado do Atlas, IA para laudos de tórax, aos primeiros hospitais clientes.", [100, 20]);
   });
   pointModels(provider.url, ["deepseek-flash"]);
   const dir = scratch();
@@ -98,16 +98,16 @@ test("a case exported from an event reaches the model exactly as the site's own 
 
   const official = await source("official", "T1");
   const media = await source("media", "T2");
-  const g = await story("Acme 发布 Atlas");
-  const first = await report(official, g, { suffix: "first", title: "Acme 发布 Atlas", hours: 30 });
+  const g = await story("Acme lança o Atlas, IA para laudos de tórax");
+  const first = await report(official, g, { suffix: "first", title: "Acme lança o Atlas, IA para laudos de tórax", hours: 30 });
   // Two reports from the same moment: the site keeps the order it read them in.
-  await report(media, g, { suffix: "B", title: "同一时刻的报道 B", hours: 10 });
-  await report(media, g, { suffix: "a", title: "同一时刻的报道 a", hours: 10 });
+  await report(media, g, { suffix: "B", title: "Matéria do mesmo momento B", hours: 10 });
+  await report(media, g, { suffix: "a", title: "Matéria do mesmo momento a", hours: 10 });
   await report(media, g, { suffix: "mention", title: "MENTION ONLY", hours: 5, role: "mention" });
   await report(media, g, { suffix: "withdrawn", title: "WITHDRAWN REPORT", hours: 4, visibility: "withdrawn" });
 
   for (const step of ["first digest", "rewrite after a correction"] as const) {
-    if (step === "rewrite after a correction") await sql`UPDATE publications SET summary = '已经更正的摘要' WHERE article_id = ${first}`;
+    if (step === "rewrite after a correction") await sql`UPDATE publications SET summary = 'Resumo já corrigido' WHERE article_id = ${first}`;
     const snapshot = path.join(dir, `${step.replace(/\W+/g, "-")}.jsonl`);
     const before = await storyState(g.id);
     const exported = await run(["--stories", g.publicId.toUpperCase(), "--out", snapshot], provider.url);
@@ -121,7 +121,7 @@ test("a case exported from an event reaches the model exactly as the site's own 
 
     assert.equal((await composeStoryDigest(g.id)).updated, true);
     const site = bodies.at(-1)!;
-    assert.ok(step === "first digest" ? site.includes("【新】") : site.includes("经过更正") && site.includes("已经更正的摘要"), step);
+    assert.ok(step === "first digest" ? site.includes("【Nova】") : site.includes("foi corrigido") && site.includes("Resumo já corrigido"), step);
     const evaluated = await run(["--cases", snapshot, "--out-dir", dir], provider.url);
     assert.equal(evaluated.code, 0, evaluated.stderr);
     assert.equal(bodies.at(-1), site, `${step}: model, system prompt, input and sampling are the site's, byte for byte`);
@@ -138,14 +138,14 @@ const evalCase = (caseId: string, title: string) => ({
     publishedAt: "2026-09-01T09:00:00+08:00",
     source: "Acme",
     firstParty: true,
-    title: `${title}的报道`,
-    summary: "Acme 向首批客户开放 Atlas 有限测试。",
-    fact: { id: 1, subject: "Acme", action: "开放", object: "Atlas", conditions: "仅限首批客户", evidence: "首批客户本月开始试用", structured: null },
+    title: `Matéria sobre ${title}`,
+    summary: "A Acme abre um teste limitado do Atlas aos primeiros hospitais clientes.",
+    fact: { id: 1, subject: "Acme", action: "abre", object: "Atlas", conditions: "Só para os primeiros hospitais clientes", evidence: "Os primeiros hospitais começam a testar este mês", structured: null },
   }],
 });
 
 test("nothing is sent when the calls exceed the limit or the candidate cannot be compared", async (t) => {
-  const provider = await stub(() => answer("", "不应调用的综述文字。", [1, 1]));
+  const provider = await stub(() => answer("", "Panorama que não deveria ser pedido.", [1, 1]));
   const dir = scratch();
   t.after(async () => {
     await provider.close();
@@ -157,10 +157,10 @@ test("nothing is sent when the calls exceed the limit or the candidate cannot be
     writeFileSync(file, text);
     return file;
   };
-  const two = write("two.jsonl", [1, 2].map((n) => JSON.stringify(evalCase(`${marker}-${n}`, `事件 ${n}`))).join("\n"));
-  const ten = write("ten.jsonl", Array.from({ length: 10 }, (_, n) => JSON.stringify(evalCase(`${marker}-ten-${n}`, `事件 ${n}`))).join("\n"));
-  const candidate = write("candidate.md", "你是 {{siteName}} 的事件编辑。只输出 JSON：{\"title\": \"...\", \"digest\": \"...\"}\n");
-  const unknownValue = write("unknown.md", "你是 {{siteName}} 的事件编辑，服务 {{audience}}。\n");
+  const two = write("two.jsonl", [1, 2].map((n) => JSON.stringify(evalCase(`${marker}-${n}`, `Evento ${n}`))).join("\n"));
+  const ten = write("ten.jsonl", Array.from({ length: 10 }, (_, n) => JSON.stringify(evalCase(`${marker}-ten-${n}`, `Evento ${n}`))).join("\n"));
+  const candidate = write("candidate.md", "Você é o editor de eventos do {{siteName}}. Devolva só JSON: {\"title\": \"...\", \"digest\": \"...\"}\n");
+  const unknownValue = write("unknown.md", "Você é o editor de eventos do {{siteName}}, para {{audience}}.\n");
   const same = path.join(dir, "same.md");
   copyFileSync(path.join(REPO_ROOT, "industry/prompts/story-digest.md"), same);
 

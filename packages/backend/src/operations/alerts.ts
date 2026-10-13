@@ -47,11 +47,11 @@ export async function collectFindings(now = Date.now()): Promise<Finding[]> {
         out.push({
           key: "content.collect",
           level: "now",
-          title: "网站停止收录新文章",
-          impact: last?.at ? `读者看不到新文章：最后一篇收录于 ${beijingStamp(last.at)}` : "读者看不到新文章：一天内没有收录任何文章",
-          heals: ALERTS.usualFlow ? `没有，${ALERTS.usualFlow}` : "没有",
-          action: "尽快发起一次维护处理",
-          detail: `editorial articles.discovered_at 超过 ${QUIET_MINUTES} 分钟没有新值（热度信号单独评估）；查 sources.schedule、出网代理与采集失败`,
+          title: "O site parou de receber artigos novos",
+          impact: last?.at ? `Os leitores não veem artigos novos: o último foi coletado em ${beijingStamp(last.at)}` : "Os leitores não veem artigos novos: nenhum artigo coletado em um dia",
+          heals: ALERTS.usualFlow ? `Não, ${ALERTS.usualFlow}` : "Não",
+          action: "Abra uma manutenção o quanto antes",
+          detail: `editorial articles.discovered_at sem valor novo há mais de ${QUIET_MINUTES} min (sinais de Em alta são avaliados à parte); verifique sources.schedule, o proxy de saída e as falhas de coleta`,
           since: last?.at ?? undefined,
         });
       }
@@ -65,12 +65,12 @@ export async function collectFindings(now = Date.now()): Promise<Finding[]> {
       out.push({
         key: "content.grouping",
         level: "now",
-        title: "有精选新闻卡在去重确认，暂未发布",
-        impact: `${waiting.length} 条已达到精选条件的新闻等待确认超过 10 分钟，还没进入精选，读者可能晚看到这些更新`,
-        heals: manual ? `${manual} 条需要人工处理后才能恢复${manual < waiting.length ? "；其余仍在自动恢复" : ""}`
-          : receipt ? "仍在等待自动恢复；付费结果未知的请求会在 30 分钟后自动放行一次" : "还会自动重试，但等待已经超过正常范围",
-        action: manual ? "转给 AI 处理；结果未知的付费请求需先核对计费与结果，再决定是否放行" : "转给 AI 检查等待原因，避免继续积压",
-        detail: waiting.slice(0, 8).map((item) => `${item.articleId}（${duration(now - item.since.getTime())}）${item.receiptId ? ` 回执 #${item.receiptId}` : ""}${item.error ? `：${item.error.slice(0, 120)}` : ""}`).join("；"),
+        title: "Notícias da Seleção presas na confirmação de duplicidade, ainda não publicadas",
+        impact: `${waiting.length} ${waiting.length === 1 ? "notícia que atingiu" : "notícias que atingiram"} os critérios da Seleção ${waiting.length === 1 ? "espera" : "esperam"} confirmação há mais de 10 min e ainda não ${waiting.length === 1 ? "entrou" : "entraram"} na Seleção; os leitores podem ver essas atualizações com atraso`,
+        heals: manual ? `${manual} ${manual === 1 ? "precisa" : "precisam"} de ação manual para se resolver${manual < waiting.length ? "; as demais ainda estão se recuperando sozinhas" : ""}`
+          : receipt ? "Ainda aguardando recuperação automática; requisições pagas com resultado desconhecido são liberadas uma vez automaticamente após 30 min" : "Ainda haverá novas tentativas automáticas, mas a espera já passou do normal",
+        action: manual ? "Encaminhe para a IA tratar; requisições pagas com resultado desconhecido precisam ter cobrança e resultado conferidos antes de decidir liberá-las" : "Encaminhe para a IA verificar o motivo da espera, para não acumular mais",
+        detail: waiting.slice(0, 8).map((item) => `${item.articleId} (${duration(now - item.since.getTime())})${item.receiptId ? ` recibo #${item.receiptId}` : ""}${item.error ? `: ${item.error.slice(0, 120)}` : ""}`).join("; "),
         since: waiting[0]!.since,
       });
     }
@@ -81,19 +81,19 @@ export async function collectFindings(now = Date.now()): Promise<Finding[]> {
       FROM articles WHERE processing_state IN ('new', 'failed') AND discovered_at > now() - interval '2 days'`;
     if (p!.waiting >= 10 || p!.failed >= 20) {
       const errors = await sql<{ error: string; n: number }[]>`
-        SELECT left(coalesce(processing_error, '（无）'), 120) AS error, count(*)::int AS n FROM articles
+        SELECT left(coalesce(processing_error, '(nenhum)'), 120) AS error, count(*)::int AS n FROM articles
         WHERE processing_state IN ('new', 'failed') AND discovered_at > now() - interval '3 hours' AND processing_error IS NOT NULL
         GROUP BY 1 ORDER BY 2 DESC LIMIT 3`;
       out.push({
         key: "content.process",
         level: "now",
-        title: "新内容卡住了，进不了网站",
-        impact: [p!.waiting >= 10 && `${p!.waiting} 篇新文章等了 2 小时以上还没处理完`, p!.failed >= 20 && `最近 3 小时 ${p!.failed} 篇新文章处理失败`]
+        title: "Conteúdo novo travado, não chega ao site",
+        impact: [p!.waiting >= 10 && `${p!.waiting} artigos novos esperam há mais de 2 h e ainda não foram processados`, p!.failed >= 20 && `${p!.failed} artigos novos falharam no processamento nas últimas 3 h`]
           .filter(Boolean)
-          .join("；") + "，精选和热点会缺内容",
-        heals: p!.waiting >= 10 ? "服务恢复后会自动补处理" : "不会，需要修好后重新处理这些文章",
-        action: "转给 AI 处理",
-        detail: errors.map((e) => `${e.error}（${e.n}）`).join("；") || "没有记录错误",
+          .join("; ") + "; a Seleção e o Em alta vão ficar sem conteúdo",
+        heals: p!.waiting >= 10 ? "Sim, o processamento é retomado quando o serviço voltar" : "Não, é preciso corrigir e reprocessar esses artigos",
+        action: "Encaminhe para a IA tratar",
+        detail: errors.map((e) => `${e.error} (${e.n})`).join("; ") || "nenhum erro registrado",
         since: p!.waiting >= 10 && p!.oldest ? p!.oldest : undefined,
       });
     }
@@ -111,10 +111,10 @@ export async function collectFindings(now = Date.now()): Promise<Finding[]> {
     out.push({
       key: "deliveries.failed",
       level: "today",
-      title: "飞书内容群有推送没发出去",
-      impact: `过去 24 小时 ${refused!.n} 条通知没进${refused!.target ?? "内容群"}`,
-      heals: "不会自动重发",
-      action: "转给 AI 处理；如果推送机器人被移出了群，需要你把它加回去",
+      title: "Envios para o grupo de conteúdo do Feishu não saíram",
+      impact: `${refused!.n} ${refused!.n === 1 ? "notificação não chegou" : "notificações não chegaram"} a ${refused!.target ?? "o grupo de conteúdo"} nas últimas 24 h`,
+      heals: "Não, não há reenvio automático",
+      action: "Encaminhe para a IA tratar; se o bot de envio foi removido do grupo, você precisa adicioná-lo de volta",
       detail: refused!.response ?? "",
     });
   }
@@ -129,20 +129,20 @@ export async function collectFindings(now = Date.now()): Promise<Finding[]> {
     const lastOk = Math.max(runs?.last_ok?.getTime() ?? 0, b?.value.uploaded ? Date.parse(b.value.at) : 0);
     const since = lastOk || runs?.first_attempt?.getTime() || now;
     const age = now - since;
-    const state = b?.value.filesError ? `数据库已上传，附件打包失败：${b.value.filesError}` : b?.value.uploaded === false ? "未上传" : "";
+    const state = b?.value.filesError ? `banco de dados enviado, falha ao empacotar os anexos: ${b.value.filesError}` : b?.value.uploaded === false ? "não enviado" : "";
     if (age > 50 * 3600_000) {
       out.push({
         key: "backup.failed",
         level: "today",
-        title: "数据库备份连续两天没成功",
-        impact: lastOk ? `万一服务器出事，最近 ${duration(age)} 的数据可能无法完整恢复` : "还没有成功的完整备份，服务器出事时可能无法恢复数据",
-        heals: "不会",
-        action: "转给 AI 处理",
-        detail: `${lastOk ? "最近一次成功" : "首次备份尝试"} ${beijingStamp(since)}${state ? `；${state}` : ""}；看 ops.backup 的运行记录`,
+        title: "O backup do banco de dados falhou por dois dias seguidos",
+        impact: lastOk ? `Se o servidor tiver um problema, os dados das últimas ${duration(age)} podem não ser recuperados por completo` : "Ainda não há backup completo bem-sucedido; se o servidor tiver um problema, os dados podem não ser recuperados",
+        heals: "Não",
+        action: "Encaminhe para a IA tratar",
+        detail: `${lastOk ? "Último sucesso" : "Primeira tentativa de backup"} ${beijingStamp(since)}${state ? `; ${state}` : ""}; veja o histórico de execuções de ops.backup`,
         since: new Date(since),
       });
     } else if (!b || !b.value.uploaded || age > 30 * 3600_000) {
-      out.push({ key: "backup.stale", level: "later", title: "数据库备份超过一天没成功", detail: b ? `最近一次 ${beijingStamp(b.value.at)}${state ? `（${state}）` : ""}；看 ops.backup` : "还没有成功的备份记录" });
+      out.push({ key: "backup.stale", level: "later", title: "O backup do banco de dados não tem sucesso há mais de um dia", detail: b ? `Última tentativa ${beijingStamp(b.value.at)}${state ? ` (${state})` : ""}; veja ops.backup` : "Ainda não há registro de backup bem-sucedido" });
     }
   }
 
@@ -155,35 +155,35 @@ export async function collectFindings(now = Date.now()): Promise<Finding[]> {
   if (collecting()) {
     for (const group of await sourceHealth(now)) {
       if (group.failing.length) out.push({
-        key: `sources.failing.${group.mode}`, level: "later", title: `${group.name}有 ${group.failing.length} 个信源连续抓取失败`,
-        detail: sourceHealthList(group.failing, s => `连续失败 ${s.fail_count} 次${s.last_error ? `，${s.last_error}` : ""}`) + "；转给 AI 检查抓取错误",
+        key: `sources.failing.${group.mode}`, level: "later", title: `${group.name}: ${sourcesCount(group.failing.length)} com falhas de coleta seguidas`,
+        detail: sourceHealthList(group.failing, s => `${s.fail_count} falhas seguidas${s.last_error ? `, ${s.last_error}` : ""}`) + "; encaminhe para a IA verificar os erros de coleta",
       });
       if (group.unstable.length) out.push({
-        key: `sources.unstable.${group.mode}`, level: "later", title: `${group.name}有 ${group.unstable.length} 个信源反复抓取失败`,
-        detail: sourceHealthList(group.unstable, s => `近 7 天失败 ${s.failed}/${s.runs} 次`) + "；即使最近成功也需检查，避免继续漏收",
+        key: `sources.unstable.${group.mode}`, level: "later", title: `${group.name}: ${sourcesCount(group.unstable.length)} com falhas de coleta repetidas`,
+        detail: sourceHealthList(group.unstable, s => `${s.failed}/${s.runs} falhas nos últimos 7 dias`) + "; verifique mesmo que a última tenha dado certo, para não continuar perdendo conteúdo",
       });
       if (group.silent.length) out.push({
-        key: `sources.silent.${group.mode}`, level: "later", title: `${group.name}有 ${group.silent.length} 个信源 7 天未发现新内容`,
-        detail: sourceHealthList(group.silent, s => `近 7 天 ${s.runs} 次抓取、0 条新发现`) + "；需对照原站，区分低频更新与采集失效",
+        key: `sources.silent.${group.mode}`, level: "later", title: `${group.name}: ${sourcesCount(group.silent.length)} sem conteúdo novo há 7 dias`,
+        detail: sourceHealthList(group.silent, s => `${s.runs} coletas e 0 itens novos nos últimos 7 dias`) + "; compare com o site original para distinguir atualização pouco frequente de coleta quebrada",
       });
       if (group.quality.length) out.push({
-        key: `sources.quality.${group.mode}`, level: "later", title: `${group.name}有 ${group.quality.length} 个信源需要核实文章质量`,
-        detail: sourceHealthList(group.quality, s => `近 7 天缺发布时间 ${s.undated} 篇、反复修订 ${s.repeated} 篇`) + "；缺时间可能让新闻按历史文章处理，反复修订需核对正文是否混入变化内容",
+        key: `sources.quality.${group.mode}`, level: "later", title: `${group.name}: ${sourcesCount(group.quality.length)} com qualidade dos artigos a verificar`,
+        detail: sourceHealthList(group.quality, s => `nos últimos 7 dias, ${s.undated} sem data de publicação e ${s.repeated} revisados repetidamente`) + "; sem data, uma notícia pode ser tratada como artigo histórico; revisões repetidas pedem conferir se o corpo está misturando conteúdo que muda",
       });
       if (group.detailFailures.length) out.push({
-        key: `sources.details.${group.mode}`, level: "later", title: `${group.name}有 ${group.detailFailures.length} 个信源详情补全失败`,
-        detail: sourceHealthList(group.detailFailures, s => `近 7 天 ${s.detail_failures} 次`) + "；查看抓取记录中的详情地址与错误",
+        key: `sources.details.${group.mode}`, level: "later", title: `${group.name}: ${sourcesCount(group.detailFailures.length)} com falha ao completar a página de detalhe`,
+        detail: sourceHealthList(group.detailFailures, s => `${s.detail_failures} nos últimos 7 dias`) + "; veja o endereço de detalhe e o erro no histórico de coleta",
       });
     }
   }
   const [r] = await sql<{ receipts: number; services: string | null; deliveries: number }[]>`
     SELECT (SELECT count(*)::int FROM receipts WHERE status = 'unknown') AS receipts,
-           (SELECT string_agg(DISTINCT service || '/' || purpose, '、') FROM receipts WHERE status = 'unknown') AS services,
+           (SELECT string_agg(DISTINCT service || '/' || purpose, ', ') FROM receipts WHERE status = 'unknown') AS services,
            (SELECT count(*)::int FROM deliveries WHERE status = 'unknown') AS deliveries`;
   if (r!.receipts > 0) {
-    out.push({ key: "receipts.unknown", level: "later", title: `${r!.receipts} 个付费请求的结果尚未确认`, detail: `${r!.services}；可能影响内容处理，后台“运行”页查看影响；自动恢复后仍未知的请求需核对后放行` });
+    out.push({ key: "receipts.unknown", level: "later", title: `${r!.receipts} ${r!.receipts === 1 ? "requisição paga com resultado" : "requisições pagas com resultado"} ainda não confirmado`, detail: `${r!.services}; pode afetar o processamento de conteúdo, veja o impacto na página "Execução" do Painel; requisições que continuam desconhecidas após a recuperação automática precisam ser conferidas antes de liberar` });
   }
-  if (r!.deliveries > 0) out.push({ key: "deliveries.unknown", level: "later", title: `${r!.deliveries} 条飞书内容群推送不确定是否送达`, detail: "后台“运行”页核对群里有没有，再标记或重发" });
+  if (r!.deliveries > 0) out.push({ key: "deliveries.unknown", level: "later", title: `${r!.deliveries} ${r!.deliveries === 1 ? "envio" : "envios"} para o grupo de conteúdo do Feishu sem confirmação de entrega`, detail: "Na página \"Execução\" do Painel, confira se chegou ao grupo e depois marque ou reenvie" });
 
   // Runnable jobs (deferred ones excluded) that have waited more than two hours.
   const queues = await sql<{ name: string; n: number; oldest: Date }[]>`
@@ -191,7 +191,7 @@ export async function collectFindings(now = Date.now()): Promise<Finding[]> {
     WHERE state IN ('created', 'retry') AND start_after <= now() AND name NOT LIKE 'cron.%' GROUP BY 1`;
   for (const q of queues) {
     if (now - q.oldest.getTime() > 2 * 3600_000) {
-      out.push({ key: `queue.${q.name}`, level: "later", title: `后台任务排队超过 2 小时：${q.name}`, detail: `${q.n} 个等待，最早的等了 ${duration(now - q.oldest.getTime())}` });
+      out.push({ key: `queue.${q.name}`, level: "later", title: `Tarefa em segundo plano na fila há mais de 2 h: ${q.name}`, detail: `${q.n} aguardando; a mais antiga espera há ${duration(now - q.oldest.getTime())}` });
     }
   }
 
@@ -200,28 +200,31 @@ export async function collectFindings(now = Date.now()): Promise<Finding[]> {
   return out;
 }
 
+/** "1 fonte", "3 fontes". */
+const sourcesCount = (n: number) => `${n} ${n === 1 ? "fonte" : "fontes"}`;
+
 /** What stops when a model service refuses us: the steps that default to its models, else a pointer to the admin. */
 function modelStops(service: string): string {
   const steps = stepsOnService(service);
-  return steps.length ? `${steps.join("、")}停了` : "用到这家模型的步骤停了（看后台“模型与评测”），新内容可能进不了精选";
+  return steps.length ? `Pararam: ${steps.join(", ")}` : "Pararam as etapas que usam este fornecedor de modelos (veja \"Modelos e avaliação\" no Painel); conteúdo novo pode não entrar na Seleção";
 }
 /** `stops` is for the services that are not models; a model service's follows from the steps that use it. */
 const PROVIDERS: Record<string, { name: string; where: string; stops?: string }> = {
-  llm: { name: "默认模型服务", where: "模型服务商的控制台" },
-  zhipu: { name: "智谱", where: "智谱开放平台" },
-  dashscope: { name: "阿里云百炼", where: "阿里云百炼控制台" },
-  deepseek: { name: "DeepSeek", where: "DeepSeek 开放平台" },
-  mimo: { name: "小米 MiMo", where: "小米 MiMo 开放平台" },
-  socialdata: { name: "SocialData", stops: "X（推特）上的新内容收不到", where: "SocialData 后台" },
-  jina: { name: "Jina", stops: "部分文章取不到正文", where: "Jina 后台" },
-  dajiala: { name: "极致了（Dajiala）", stops: "公众号新文章收不到", where: "极致了后台" },
+  llm: { name: "Serviço de modelos padrão", where: "o console do fornecedor de modelos" },
+  zhipu: { name: "Zhipu", where: "a plataforma aberta da Zhipu" },
+  dashscope: { name: "Alibaba Cloud Model Studio (Bailian)", where: "o console do Alibaba Cloud Model Studio" },
+  deepseek: { name: "DeepSeek", where: "a plataforma aberta da DeepSeek" },
+  mimo: { name: "Xiaomi MiMo", where: "a plataforma aberta da Xiaomi MiMo" },
+  socialdata: { name: "SocialData", stops: "Conteúdo novo do X (Twitter) não chega", where: "o painel da SocialData" },
+  jina: { name: "Jina", stops: "Alguns artigos ficam sem o corpo", where: "o painel da Jina" },
+  dajiala: { name: "Dajiala", stops: "Artigos novos de contas do WeChat não chegam", where: "o painel da Dajiala" },
 };
 export const providerName = (service: string) => PROVIDERS[service]?.name ?? service;
 export const providerStops = (service: string) => {
   const p = PROVIDERS[service];
-  return p ? (p.stops ?? modelStops(service)) : "相关功能停了";
+  return p ? (p.stops ?? modelStops(service)) : "As funções relacionadas pararam";
 };
-export const providerConsole = (service: string) => PROVIDERS[service]?.where ?? `${service} 后台`;
+export const providerConsole = (service: string) => PROVIDERS[service]?.where ?? `o painel de ${service}`;
 
 /** Paid services that refuse us (no balance, a dead key), and daily budgets used up. */
 async function providerFindings(): Promise<Finding[]> {
@@ -236,11 +239,11 @@ async function providerFindings(): Promise<Finding[]> {
       key: `provider.refused.${p.service}`,
       level: "today",
       owner: true,
-      title: `${providerName(p.service)} 拒绝服务，可能欠费或账号失效`,
+      title: `${providerName(p.service)} recusa o serviço: talvez falta de saldo ou conta inválida`,
       impact: providerStops(p.service),
-      heals: "不会",
-      action: `去${providerConsole(p.service)}看余额和账号状态，充值或恢复后系统会自动继续；两样都正常的话，发起一次维护查原因`,
-      detail: `最近 1 小时被拒 ${p.n} 次：${p.last}`,
+      heals: "Não",
+      action: `Veja o saldo e o status da conta em ${providerConsole(p.service)}; depois de recarregar ou regularizar, o sistema continua sozinho; se ambos estiverem normais, abra uma manutenção para achar a causa`,
+      detail: `${p.n} recusas na última hora: ${p.last}`,
     });
   }
   const capped = await sql<{ service: string; per_day: number; used: number }[]>`
@@ -251,11 +254,11 @@ async function providerFindings(): Promise<Finding[]> {
     out.push({
       key: `budget.day.${c.service}`,
       level: "later",
-      title: `${providerName(c.service)} 过去 24 小时的调用额度用完了`,
-      impact: `${providerStops(c.service)}，直到额度随时间腾出来`,
-      heals: "会，额度按 24 小时滚动恢复",
-      action: "这次不用处理；如果经常出现，再决定要不要调高额度",
-      detail: `24 小时内 ${c.used} 次，上限 ${c.per_day}（budgets 表）`,
+      title: `${providerName(c.service)}: a cota de chamadas das últimas 24 h acabou`,
+      impact: `${providerStops(c.service)}, até a cota se liberar com o tempo`,
+      heals: "Sim, a cota se recompõe numa janela móvel de 24 h",
+      action: "Desta vez não precisa fazer nada; se acontecer com frequência, decida se aumenta a cota",
+      detail: `${c.used} chamadas em 24 h, limite ${c.per_day} (tabela budgets)`,
     });
   }
   return out;
@@ -276,7 +279,7 @@ async function alertState(): Promise<AlertState> {
   const legacy = state["report.daily"];
   if (legacy && Number.isFinite(Date.parse(legacy.since))) {
     const date = beijingDate(legacy.since);
-    state[`${DAILY_PREFIX}${date}`] ??= { ...legacy, title: `${date} 的日报还没生成` };
+    state[`${DAILY_PREFIX}${date}`] ??= { ...legacy, title: `O Briefing diário de ${date} ainda não foi gerado` };
     delete state["report.daily"];
   }
   return state;
@@ -301,10 +304,10 @@ async function dailyReportFindings(now: number): Promise<Finding[]> {
   const published = new Set((await sql<{ key: string }[]>`SELECT key FROM reports WHERE kind = 'daily' AND key IN ${sql(overdue)}`).map(r => r.key));
   return overdue.filter(date => !published.has(date)).map(date => ({
     key: `${DAILY_PREFIX}${date}`, level: "now",
-    title: `${date} 的日报还没生成`, impact: `读者看不到 ${date} 的日报`,
-    heals: "尚未补齐；需查看运行记录确认是否需要人工补做",
-    action: "尽快发起一次维护处理",
-    detail: `reports daily ${date} 不存在；看 reports.compose 的运行记录`,
+    title: `O Briefing diário de ${date} ainda não foi gerado`, impact: `Os leitores não veem o Briefing diário de ${date}`,
+    heals: "Ainda não foi recuperado; veja o histórico de execuções para saber se é preciso gerar manualmente",
+    action: "Abra uma manutenção o quanto antes",
+    detail: `reports daily ${date} não existe; veja o histórico de execuções de reports.compose`,
   }));
 }
 
@@ -351,6 +354,6 @@ export async function sendDigest(now = Date.now()) {
   const items = (await collectFindings(now)).filter((f) => f.level === "later");
   const lines = items.map((f, i) => `${i + 1}. ${f.title}${f.detail ? `\n   ${f.detail}` : ""}`);
   if (!lines.length) return { items: 0 };
-  await sendAlert(`📋 系统日报 · ${beijingDay(now)}`, ["以下事项需要跟进，具体影响见各条说明；可把整条转给 AI 处理。", ...lines]);
+  await sendAlert(`📋 Relatório diário do sistema · ${beijingDay(now)}`, ["Os itens abaixo precisam de acompanhamento; o impacto está em cada um. Você pode encaminhar a mensagem inteira para a IA tratar.", ...lines]);
   return { items: lines.length };
 }

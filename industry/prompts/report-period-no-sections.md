@@ -1,1 +1,1 @@
-sections 留空。
+sections fica vazio.

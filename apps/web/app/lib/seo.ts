@@ -4,7 +4,7 @@
 import type { MetaDescriptor } from "react-router";
 import type { ReportDetail, TimelineFilters } from "@aihot/contracts/site";
 import { isCategoryKey, isChannelKey } from "@aihot/contracts/taxonomy";
-import { SITE, subjectAfter, withSubject } from "@aihot/site";
+import { SITE, withSubject } from "@aihot/site";
 
 /**
  * The site's address: SITE_URL while rendering on the server (what crawlers and share previews read),
@@ -150,8 +150,8 @@ export function siteLd() {
       "@context": "https://schema.org",
       "@type": "Dataset",
       "@id": `${base}/#dataset`,
-      name: `${SITE.name} — ${withSubject("行业动态数据集")}`,
-      description: `${subjectAfter("持续更新的中文", "行业动态")}：每条附中文摘要、评分与原文出处，${subjectAfter("另有每日精选与", "日报")}，可通过 RSS 与公开 API 获取。`,
+      name: `${SITE.name} — ${withSubject("Conjunto de dados de notícias")}`,
+      description: `Notícias de ${SITE.subject} atualizadas continuamente, cada uma com resumo em português, nota e fonte original, além da seleção e do briefing diários; disponível por RSS e API pública.`,
       url: base,
       inLanguage: SITE.locale,
       isAccessibleForFree: true,
@@ -160,12 +160,12 @@ export function siteLd() {
       creator: orgRef(),
       publisher: orgRef(),
       distribution: [
-        { "@type": "DataDownload", name: "精选 RSS", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed.xml` },
-        { "@type": "DataDownload", name: "全部动态 RSS", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/all.xml` },
-        { "@type": "DataDownload", name: `${withSubject("日报")} RSS`, encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/daily.xml` },
-        { "@type": "DataDownload", name: `${withSubject("周报")} RSS`, encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/weekly.xml` },
-        { "@type": "DataDownload", name: `${withSubject("月报")} RSS`, encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/monthly.xml` },
-        { "@type": "DataDownload", name: "公开 API v1", encodingFormat: "application/json", contentUrl: `${base}/api/v1/items` },
+        { "@type": "DataDownload", name: "RSS da seleção", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed.xml` },
+        { "@type": "DataDownload", name: "RSS de todas as notícias", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/all.xml` },
+        { "@type": "DataDownload", name: "RSS do briefing diário", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/daily.xml` },
+        { "@type": "DataDownload", name: "RSS do briefing semanal", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/weekly.xml` },
+        { "@type": "DataDownload", name: "RSS do briefing mensal", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/monthly.xml` },
+        { "@type": "DataDownload", name: "API pública v1", encodingFormat: "application/json", contentUrl: `${base}/api/v1/items` },
         { "@type": "DataDownload", name: "OpenAPI", encodingFormat: "application/json", contentUrl: `${base}/openapi-v1.json` },
       ],
     },
@@ -226,13 +226,13 @@ export function archiveLd(path: string, name: string, entries: Array<{ path: str
   };
 }
 
-const REPORT_NAME = { daily: "日报", weekly: "周报", monthly: "月报" } as const;
+const REPORT_NAME = { daily: "Briefing diário", weekly: "Briefing semanal", monthly: "Briefing mensal" } as const;
 
 /** One report issue: an editorial round-up by the site (no personal byline), sections as its sections. */
 export function reportLd(r: ReportDetail, path: string, description: string) {
   return articleLd({
     path,
-    headline: `${SITE.name} ${REPORT_NAME[r.kind]} · ${r.key}`,
+    headline: `${REPORT_NAME[r.kind]} do ${SITE.name} · ${r.key}`,
     description,
     publishedAt: r.generatedAt,
     section: r.sections.map((s) => s.label),

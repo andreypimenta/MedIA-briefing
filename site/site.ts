@@ -3,58 +3,57 @@
 // 域名不在这里：部署时用环境变量 SITE_URL 设置。
 
 /**
- * 日报、周报、月报什么时候出（北京时间，HH:mm）：日报收这个时间之前的 24 小时，周报在每个自然周之后的周一出，
+ * 日报、周报、月报什么时候出（horário de Brasília，HH:mm）：日报收这个时间之前的 24 小时，周报在每个自然周之后的周一出，
  * 月报在每月 1 日出。排程、成刊时间窗口、缺期告警和所有提到时间的文案都读它（public/ 里的文件写占位
  * {{dailyTime}}、{{weeklyTime}}、{{monthlyTime}}）；排程每半小时检查一次，所以写整点或半点。
  */
 export const EDITION_TIMES = { daily: "08:00", weekly: "10:00", monthly: "10:30" };
 
-/** “每天 08:00”“每周一 10:00”“每月 1 日 10:30”：写进句子里的出刊时间。 */
+/** "todos os dias às 08:00", "toda segunda-feira às 10:00", "todo dia 1º às 10:30": o horário de publicação dentro de uma frase. */
 export const EDITION_WHEN = {
-  daily: `每天 ${EDITION_TIMES.daily}`,
-  weekly: `每周一 ${EDITION_TIMES.weekly}`,
-  monthly: `每月 1 日 ${EDITION_TIMES.monthly}`,
+  daily: `todos os dias às ${EDITION_TIMES.daily}`,
+  weekly: `toda segunda-feira às ${EDITION_TIMES.weekly}`,
+  monthly: `todo dia 1º às ${EDITION_TIMES.monthly}`,
 };
 
 export const SITE = {
   /** 站名：导航、页面标题、分享图、RSS、MCP、后台都用它。 */
-  name: "MyHOT",
+  name: "MedIA Briefing",
   /**
-   * 行业词：拼进默认说法里，比如“AI 日报”“AI 动态”。
-   * 改成“法律”“HR”“黄金”之类，页面上就会变成“法律日报”“法律动态”。
+   * 行业词：拼进默认说法里（withSubject / subjectAfter），比如 "Notícias de IA em medicina"。
    */
-  subject: "AI",
+  subject: "IA em medicina",
   /** 首页的完整标题（浏览器标签、搜索结果）。 */
-  homeTitle: "MyHOT — AI 行业动态 · 每日精选与日报",
+  homeTitle: "MedIA Briefing — IA em medicina: seleção diária e briefing para médicos",
   /** 主题目录页（/topics）的标题。 */
-  topicsTitle: "AI 主题：公司与模型、技术方向、内容形态的最新动态",
+  topicsTitle: "Tópicos de IA em medicina: empresas e instituições, especialidades e formatos",
   /** 反馈表单输入框里的示例。 */
-  feedbackExample: "例如：我在搜索某个关键词时遇到……我原本想……",
+  feedbackExample: "Por exemplo: ao buscar um termo, aconteceu… e eu esperava…",
   /** 反馈页标题下面的一句话。 */
-  feedbackLead: "发现 bug、想要的功能、看不顺眼的地方，都可以告诉我们。",
+  feedbackLead: "Encontrou um erro, quer um recurso ou algo não ficou bom? Conte para a gente.",
   /** 反馈表单邮箱框里的提示。 */
-  feedbackEmailHint: "留下邮箱，我们可以回信联系你",
+  feedbackEmailHint: "Deixe seu e-mail se quiser que a gente responda",
   /** 一句话介绍：搜索引擎、分享卡片、RSS、llms.txt 会用。 */
-  description: `从一批 AI 信源里挑出值得看的动态，把同一件事的多篇报道归到一起，${EDITION_WHEN.daily} 出一份日报。`,
+  description: `Seleciona o que vale a pena ler sobre IA em medicina em dezenas de fontes, junta as notícias sobre o mesmo fato e publica um briefing ${EDITION_WHEN.daily}.`,
   /** llms.txt 里一句话介绍下面的一段详细介绍（选填）。 */
   llmsIntro: null as string | null,
   /** 一行小字：分享图、海报下方。 */
-  tagline: "值得关注的 AI 动态",
+  tagline: "O que importa em IA na medicina",
   /** 搜索引擎读到的关键词（首页结构化数据）。 */
-  keywords: ["AI 资讯", "AI 新闻", "AI 日报", "AI 行业动态"] as string[],
+  keywords: ["IA em medicina", "inteligência artificial na saúde", "notícias de IA médica", "briefing diário de IA em saúde"] as string[],
   /** 网站开始收录的年份（结构化数据的时间范围，选填）。 */
   since: null as string | null,
   /** 界面语言（HTML lang、og:locale）。 */
-  locale: "zh-CN",
+  locale: "pt-BR",
   /** 默认域名，只在没设置 SITE_URL 时使用。 */
   defaultUrl: "http://localhost:3000",
   /** 标准图标（favicon.ico、icon.png、icon-192.png、apple-icon.png、logo.svg）以外也放在网站根目录的图标，site/brand/ 里的文件名（选填）；manifest.webmanifest 或外站引用了它们时用。 */
   rootIcons: [] as string[],
   /**
-   * MCP 工具名的前缀（小写字母、数字、下划线），工具会叫 myhot_get_latest、myhot_search……
+   * MCP 工具名的前缀（小写字母、数字、下划线），工具会叫 mediabriefing_get_latest、mediabriefing_search……
    * 已经有人接入后就不要再改。
    */
-  mcpPrefix: "myhot",
+  mcpPrefix: "mediabriefing",
   /**
    * 公开接口（MCP、OpenAPI、llms.txt）的版本号，只升不降。
    * 改了接口里已有的字段或含义时升主版本，并在部署说明里写清。
@@ -63,27 +62,27 @@ export const SITE = {
   /** 对外联系邮箱（选填）：llms.txt 和给 Agent 的使用说明里会写。 */
   contactEmail: null as string | null,
   /** 关于页底部的一行小字（选填）。 */
-  footerNote: "由 AIHOT 开源框架驱动",
+  footerNote: "Feito com o framework open source AIHOT",
   /** 中国大陆网站的 ICP 备案号（选填），填了就显示在侧栏底部和“我的”页底部，并链接到工信部备案系统。 */
   icp: null as string | null,
   /** 源码的 GitHub 仓库地址（选填），填了就在侧栏底部和“我的”页底部显示“GitHub 开源”。 */
   github: null as string | null,
   /** 结构化数据里的网站运营者（搜索引擎用）。 */
   organization: {
-    name: "MyHOT",
+    name: "MedIA Briefing",
     /** 创始人（选填）。 */
     founder: null as null | { name: string; alternateName?: string; jobTitle?: string; description?: string; url?: string },
   },
   /** 抓取信源时报上的名字和版本（User-Agent 里用），不要冒用别的站。 */
-  crawlerName: "MyHOTBot/1.0",
+  crawlerName: "MedIABriefingBot/1.0",
 } as const;
 
 /** 使用规则和隐私说明两页（正文在 pages/ 里）。 */
 export const POLICY = {
   terms: {
     /** 页面名：导航、页脚、页面标题都用它。 */
-    name: "使用规则",
-    description: "本站网页、RSS、公开 API 与 MCP 的使用规则。",
+    name: "Termos de uso",
+    description: "Regras de uso do site, do RSS, da API pública e do MCP.",
     /** llms.txt 里对这一页的一句说明（选填）。 */
     covers: null as string | null,
     /** Agent 接入页的 RSS、API 两栏各自提醒的使用规则（选填）。 */
@@ -100,7 +99,7 @@ export const POLICY = {
     headers: null as null | Record<string, string>,
   },
   privacy: {
-    description: "本站如何处理浏览器本地数据、反馈资料与访问日志。",
+    description: "Como o site trata os dados locais do navegador, o conteúdo enviado pelo formulário de feedback e os registros de acesso.",
     /** llms.txt 里对这一页的一句说明（选填）。 */
     covers: null as string | null,
   },
@@ -114,7 +113,7 @@ export const POLICY = {
 /** 条目卡片和详情页上的几处说法和显示。 */
 export const ITEM_COPY = {
   /** 模型写的那句理由叫什么：卡片、详情页、Markdown 导出、给 Agent 的回答和群推送都用它。 */
-  reasonLabel: "推荐理由",
+  reasonLabel: "Por que ler",
   /** 读者在网页和分享图上看不看得到 AI 评分。只管显示：公开 API 和 MCP 的数据照样带 score，后台照常显示。 */
   showScore: true,
 };
@@ -130,20 +129,20 @@ interface ContactCard {
 
 /** 关于页的文案。数字（信源数、收录数、精选数、日报期数）来自站内实时统计，不用写在这里。 */
 export const ABOUT = {
-  kicker: `关于 ${SITE.name}`,
+  kicker: `Sobre o ${SITE.name}`,
   /** 页面描述（搜索结果、分享卡片）。 */
-  description: `关于 ${SITE.name}：${SITE.description}`,
+  description: `Sobre o ${SITE.name}: ${SITE.description}`,
   /** 大标题：第一行正常颜色，第二行强调色。 */
-  headline: ["AI 圈每天都有新动静，", "值得看的，只有几条。"] as [string, string],
+  headline: ["Todo dia surge novidade em IA na medicina.", "Só algumas merecem o seu tempo."] as [string, string],
   /** 标题下面的一段话。{sources} 会换成实时的信源数（两边自动加空格，所以 {sources} 两边不写空格）；统计没取到时换成 sourcesFallback。 */
-  lead: `${SITE.name} 替你盯着{sources}个信源：抓取、归并、打分、精选，${EDITION_WHEN.daily} 出一份日报。免费，不用注册。`,
-  sourcesFallback: "十几",
+  lead: `O ${SITE.name} acompanha{sources}fontes por você: coleta, agrupa, avalia e seleciona, e publica um briefing ${EDITION_WHEN.daily}. Gratuito e sem cadastro.`,
+  sourcesFallback: " dezenas de ",
   /** 信源河动画下面的四个环节。 */
   steps: {
-    collect: "官方博客、媒体和个人的订阅源都在看；更新越勤的源看得越勤，最快 15 分钟看一次。",
-    store: "抓到的都存下来，同一件事的报道归到一起，热点榜就是从这里算出来的。",
-    select: `模型先看是不是这个行业的事、有没有实际信息，再写中文标题、摘要和${ITEM_COPY.reasonLabel}；营销稿和重复转发进不来。`,
-    publish: `${EDITION_WHEN.daily} 出日报，${EDITION_WHEN.weekly} 出周报，${EDITION_WHEN.monthly} 出月报。`,
+    collect: "Acompanhamos órgãos reguladores, revistas científicas, empresas, imprensa especializada e especialistas; quanto mais uma fonte publica, mais vezes é verificada (no máximo a cada 15 minutos).",
+    store: "Tudo o que é coletado fica guardado, e as notícias sobre o mesmo fato são agrupadas; é daí que sai a lista Em alta.",
+    select: `O modelo verifica se a notícia é de IA em medicina e se traz informação real, depois escreve título, resumo e "${ITEM_COPY.reasonLabel}" em português; peças de marketing e repetições ficam de fora.`,
+    publish: `Briefing diário ${EDITION_WHEN.daily}, semanal ${EDITION_WHEN.weekly} e mensal ${EDITION_WHEN.monthly} (horário de Brasília).`,
   },
   /**
    * 作者块（选填），null 就不显示。
@@ -158,7 +157,7 @@ export const ABOUT = {
     feishu?: ContactCard;
   },
   /** 页面底部的版权与下架说明，中间接“反馈页”的链接。 */
-  copyright: [`${SITE.name} 是聚合摘要和阅读索引，原文版权归各来源所有。如果你是来源方，希望更正、下架或调整展示方式，可以通过`, "联系我们。"] as [string, string],
+  copyright: [`O ${SITE.name} é um agregador de resumos e um índice de leitura; os direitos dos textos originais pertencem às respectivas fontes. Se você representa uma fonte e quer corrigir, retirar ou mudar a forma de exibição, fale com a gente pela `, "."] as [string, string],
   /** 页面底部“使用规则”链接的锚点 id（选填）：外部文档写死过这个锚点就填上，以后不要改。 */
   termsAnchor: null as string | null,
 } as const;
@@ -176,7 +175,7 @@ export const ADMIN = {
 /** Agent 接入页的示例。 */
 export const AGENT = {
   /** MCP 工具表里“搜索”一行：能搜什么、可以怎么问。 */
-  search: { scope: "按公司、产品、人物或话题搜最近 7 天", ask: "这家公司最近发了什么？" },
+  search: { scope: "Busca nos últimos 7 dias por empresa, produto, pessoa ou tema", ask: "O que a FDA aprovou de IA recentemente?" },
 };
 
 /** 日报、周报、月报版面上的说法。 */
@@ -187,21 +186,21 @@ export const REPORTS = {
   motto: SITE.subject as string,
   /** 每种报告页面的描述（搜索结果、分享卡片），不带句号；llms.txt 介绍周报、月报时也用它。 */
   descriptions: {
-    daily: `${SITE.name} ${subjectAfter(`${EDITION_WHEN.daily}（北京时间）发布的`, "行业精编日报")}`,
-    weekly: subjectAfter("每周", "行业综合回顾"),
-    monthly: subjectAfter("每月", "行业盘点"),
+    daily: `Briefing diário de ${SITE.subject} do ${SITE.name}, publicado ${EDITION_WHEN.daily} (horário de Brasília)`,
+    weekly: `Resumo semanal de ${SITE.subject}`,
+    monthly: `Balanço mensal de ${SITE.subject}`,
   },
   /**
    * 一期里的一条怎么称呼（“4 件大事”）：没有头条时的标题（“这一天的 4 件 AI 大事”）、报头和往期目录的条数、
    * 周报月报没有总述时的那句话，以及订阅说明里的“按栏目分好的大事”都用它。
    */
-  entry: { measure: "件", noun: "大事" },
+  entry: { measure: "", noun: "destaques" },
   /** 报头上其余几个数字后面的说法；精选数和日报期数在关于页、主题页也这样写。 */
-  metricUnits: { sourcesCount: "个来源", firstPartyEvents: "件一手发布", selectedCount: "条精选", reportsCovered: "期日报" },
+  metricUnits: { sourcesCount: "fontes", firstPartyEvents: "anúncios oficiais", selectedCount: "selecionadas", reportsCovered: "edições do briefing" },
   /** 报告分享图上“共几条”的说法。 */
-  shareUnit: "件大事",
+  shareUnit: "destaques",
   /** 日报时段内有资料经过评判、但没有新大事时的标题与导语。 */
-  quiet: { title: "今日安静，无大事发生", paragraph: `${subjectAfter("北京时间 {start} 至 {end}，没有新的", "大事")}。` },
+  quiet: { title: "Dia calmo, sem grandes novidades", paragraph: `Entre {start} e {end} (horário de Brasília), não houve novos destaques de ${SITE.subject}.` },
 };
 
 /** 运维告警（只发给站长）里随部署而变的几处说法。 */
@@ -211,7 +210,7 @@ export const ALERTS = {
   /** 同一条告警里，“没有”后面补一句平时的收录量；null 就不写。 */
   usualFlow: null as string | null,
   /** worker 停了的告警里，怎么看它的日志。 */
-  workerLogs: "看 worker 的日志（docker compose logs worker）",
+  workerLogs: "veja os logs do worker (docker compose logs worker)",
   /** 某家模型服务拒绝服务或额度用完时，告警里说哪些步骤停了；没写的服务用通用说法。 */
   modelStops: {} as Record<string, string>,
 };
@@ -233,18 +232,18 @@ export const COMMUNITY_FEEDS: { dev: string[]; hn: string[] } = {
 
 /** 各页分享图（/og/pages/*.png）上的文字。主题目录页的那张按主题数自动生成。 */
 export const CARDS: Record<string, { kicker: string; title: string; subtitle: string; accent?: "hot" | "amber" }> = {
-  site: { kicker: subjectAfter("每日", "精选"), title: SITE.tagline, subtitle: SITE.description },
-  all: { kicker: subjectAfter("全部", "动态"), title: "所有信源的最新动态，一站看完", subtitle: "按时间汇总各信源的最新动态，可按类别与标签筛选。" },
-  hot: { kicker: "热点榜", title: "过去 48 小时，大家在讨论什么", subtitle: "热度指数、趋势与组成热度的公开来源。", accent: "hot" },
-  daily: { kicker: withSubject("日报"), title: subjectAfter(`每天 ${spokenTime(EDITION_TIMES.daily)}，一份读得完的`, "日报"), subtitle: `${subjectAfter("前一天值得关注的", "动态")}。` },
-  weekly: { kicker: withSubject("周报"), title: `一周${REPORTS.entry.noun}，一次看清`, subtitle: "本周的主线、重要发布与值得回看的讨论。" },
-  monthly: { kicker: withSubject("月报"), title: "一个月的变化", subtitle: "月度主线与关键事件回顾。" },
-  about: { kicker: "关于", title: `关于 ${SITE.name}`, subtitle: SITE.description },
-  terms: { kicker: "使用规则", title: `${SITE.name} 使用规则`, subtitle: "网页、API、RSS 与 MCP 的使用范围。" },
-  privacy: { kicker: "隐私说明", title: `${SITE.name} 隐私说明`, subtitle: "访问日志、浏览器本地数据与反馈资料的处理方式。" },
-  changelog: { kicker: "更新日志", title: `${SITE.name} 更新日志`, subtitle: "功能更新、优化、公告与下线记录。" },
-  feedback: { kicker: "反馈", title: "告诉我们哪里可以更好", subtitle: "内容、功能、接入，或来源方的更正与下架请求。" },
-  agent: { kicker: "Agent 接入", title: `把 ${SITE.name} 接进你的 Agent`, subtitle: "MCP、RSS、API 三种方式，匿名只读，无需 API Key。" },
+  site: { kicker: `Seleção diária · ${SITE.subject}`, title: SITE.tagline, subtitle: SITE.description },
+  all: { kicker: "Todas as notícias", title: "As últimas notícias de todas as fontes, num só lugar", subtitle: "Tudo o que as fontes publicaram, em ordem cronológica, com filtros por categoria e tag." },
+  hot: { kicker: "Em alta", title: "O que está sendo discutido nas últimas 48 horas", subtitle: "Índice de repercussão, tendência e as fontes públicas por trás dele.", accent: "hot" },
+  daily: { kicker: "Briefing diário", title: `Todo dia às ${spokenTime(EDITION_TIMES.daily)}, um briefing que dá para ler inteiro`, subtitle: `O que importou em ${SITE.subject} no dia anterior.` },
+  weekly: { kicker: "Briefing semanal", title: `Os ${REPORTS.entry.noun} da semana, de uma vez`, subtitle: "Os fios condutores da semana, os anúncios importantes e as discussões que valem rever." },
+  monthly: { kicker: "Briefing mensal", title: "O que mudou no mês", subtitle: "Os fios condutores e os fatos-chave do mês." },
+  about: { kicker: "Sobre", title: `Sobre o ${SITE.name}`, subtitle: SITE.description },
+  terms: { kicker: "Termos de uso", title: `Termos de uso do ${SITE.name}`, subtitle: "O que é permitido no site, na API, no RSS e no MCP." },
+  privacy: { kicker: "Privacidade", title: `Privacidade no ${SITE.name}`, subtitle: "Como tratamos registros de acesso, dados locais do navegador e feedback enviado." },
+  changelog: { kicker: "Novidades", title: `Novidades do ${SITE.name}`, subtitle: "Novos recursos, melhorias, avisos e o que saiu do ar." },
+  feedback: { kicker: "Feedback", title: "Diga o que podemos melhorar", subtitle: "Conteúdo, recursos, integração ou pedidos de correção e retirada de fontes." },
+  agent: { kicker: "Integração com agentes", title: `Conecte o ${SITE.name} ao seu agente`, subtitle: "MCP, RSS ou API: acesso anônimo, só leitura, sem API Key." },
 };
 
 /** 公开接口的访问约定里随部署而变的几处：给 Agent 的使用说明、llms.txt 会写。 */
@@ -300,19 +299,18 @@ export const PUBLIC_CATEGORIES = {
   feedLabels: {},
 } as const;
 
-/** “AI 日报”这类说法：行业词和名词之间，英文词加空格，中文词不加。 */
+/** "Notícias de IA em medicina": o nome seguido do assunto do site (em português o assunto vem depois, com "de"). */
 export function withSubject(noun: string): string {
-  return /[A-Za-z0-9]$/.test(SITE.subject) ? `${SITE.subject} ${noun}` : `${SITE.subject}${noun}`;
+  return `${noun} de ${SITE.subject}`;
 }
 
-/** “按主题看 AI”“往期 AI 日报”这类说法：行业词接在中文后面，英文词前加空格，中文词不加；noun 照 withSubject 接上。 */
+/** "Tópicos de IA em medicina", "Últimos destaques de IA em medicina": um texto seguido de withSubject(noun), ou só do assunto. */
 export function subjectAfter(text: string, noun?: string): string {
-  const gap = /^[A-Za-z0-9]/.test(SITE.subject) ? " " : "";
-  return `${text}${gap}${noun ? withSubject(noun) : SITE.subject}`;
+  return `${text} ${noun ? withSubject(noun) : SITE.subject}`;
 }
 
-/** “8 点”“10 点 30 分”：口语里的 HH:mm。 */
+/** "8h", "10h30": o HH:mm como se fala. */
 function spokenTime(time: string): string {
   const [hour, minute] = time.split(":").map(Number) as [number, number];
-  return `${hour} 点${minute ? ` ${minute} 分` : ""}`;
+  return `${hour}h${minute ? String(minute).padStart(2, "0") : ""}`;
 }

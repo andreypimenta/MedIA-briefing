@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Link, redirect, useLoaderData, useNavigation, useSearchParams } from "react-router";
 import type { Route } from "./+types/all";
 import type { PoolResponse } from "@aihot/contracts/site";
-import { SITE, subjectAfter } from "@aihot/site";
+import { SITE } from "@aihot/site";
 import { beijingTime } from "@aihot/contracts/time";
 import { cachedPage, loadOr404 } from "../lib/api.server";
 import { pageReuse } from "../lib/page-reuse";
@@ -17,11 +17,11 @@ import { isPhone, type Screen } from "../components/shell/screens";
 import { openSearch } from "../features/search/SearchOverlay";
 import { addRecentSearch } from "../lib/local-state";
 
-export const handle: Screen = { tab: "featured", name: "全部" };
+export const handle: Screen = { tab: "featured", name: "Todas" };
 export { pageHeaders as headers } from "../lib/api.server";
 export const { clientLoader, shouldRevalidate } = pageReuse<typeof loader>();
 
-const ALL_TITLE = subjectAfter("全部", "动态");
+const ALL_TITLE = "Todas as notícias";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
@@ -45,8 +45,8 @@ export function meta({ loaderData }: Route.MetaArgs) {
   const page = loaderData?.data.page ?? 1;
   const path = listPath("/all", { ...(f && filterParams(f)), q, tab: f?.tab === "relevance" ? "relevance" : null, page: page > 1 ? page : null });
   return pageMeta({
-    title: q ? `搜索：${q}` : ALL_TITLE,
-    description: `${SITE.name} 收录的${subjectAfter("全部", "相关动态")}，可按频道、类别与标签筛选，支持中英文搜索。`,
+    title: q ? `Busca: ${q}` : ALL_TITLE,
+    description: `Todas as notícias de ${SITE.subject} coletadas pelo ${SITE.name}, com filtros por canal, categoria e tag e busca em português e inglês.`,
     path,
     noindex: !!q,
     jsonLd: q ? undefined : itemListLd(path, ALL_TITLE, loaderData?.data.items.map((i) => i.title) ?? []),
@@ -79,7 +79,7 @@ export default function AllPage() {
     else sp.delete("tab");
     return `/all?${sp}`;
   };
-  const title = f.q ? `搜索“${f.q}”` : f.tag ? `#${f.tag}` : null;
+  const title = f.q ? `Busca: “${f.q}”` : f.tag ? `#${f.tag}` : null;
   const updated = beijingTime(data.freshness);
   // Searches are remembered in this browser for the phone search (listed in the privacy notice).
   useEffect(() => {
@@ -95,7 +95,7 @@ export default function AllPage() {
       {/* Phones: the feed bar, or for a search the query (tap to change it) and back to 全部. */}
       {f.q ? (
         <PhoneBar
-          back={{ to: "/all", label: "全部" }}
+          back={{ to: "/all", label: "Todas" }}
           center={
             <button type="button" onClick={(event) => openSearch(f.q ?? "", event.currentTarget)} className="flex h-11 min-w-0 max-w-full items-center gap-2 rounded-full bg-bg-sunk px-3.5 text-[15px] text-ink ring-1 ring-inset ring-line-soft dark:bg-bg-muted/60">
               <IconSearch size={16} className="shrink-0 text-ink-4" />
@@ -122,12 +122,12 @@ export default function AllPage() {
           <PillTabs
             size="xs"
             layoutId="all-search-sort"
-            label="搜索排序"
+            label="Ordenar busca"
             active={f.tab}
-            items={(["time", "relevance"] as const).map((t) => ({ key: t, label: t === "time" ? "最新（标题与摘要）" : "全文相关", to: searchTabHref(t) }))}
+            items={(["time", "relevance"] as const).map((t) => ({ key: t, label: t === "time" ? "Mais recentes (título e resumo)" : "Mais relevantes (texto completo)", to: searchTabHref(t) }))}
           />
           <span className="text-[12px] text-ink-4">
-            找到 <span className="num">{data.total >= 2000 ? "2000+" : data.total}</span> 条 · 更新于 <span className="num">{updated}</span>
+            <span className="num">{data.total >= 2000 ? "2000+" : data.total}</span> {data.total === 1 ? "resultado" : "resultados"} · atualizado às <span className="num">{updated}</span>
           </span>
         </div>
       )}
@@ -136,16 +136,16 @@ export default function AllPage() {
         {data.items.length === 0 ? (
           <div className="mt-2 lg:card">
             <EmptyState
-              title="没有找到相关内容"
+              title="Nada encontrado"
               action={
                 f.q && f.tab === "time" ? (
                   <Link to={searchTabHref("relevance")} className="text-[13px] font-medium text-accent hover:underline">
-                    试试“全文相关”，连正文一起搜
+                    Tente “Mais relevantes”, que busca também no texto
                   </Link>
                 ) : undefined
               }
             >
-              {f.q ? "换个说法，或者去掉筛选再试。" : "这个筛选下暂时没有内容。"}
+              {f.q ? "Tente outras palavras ou remova os filtros." : "Ainda não há conteúdo com este filtro."}
             </EmptyState>
           </div>
         ) : (
@@ -153,7 +153,7 @@ export default function AllPage() {
         )}
       </div>
       <Pagination page={data.page} pageCount={data.pageCount} href={(p) => pageHref(params, p)} />
-      {data.page >= 50 && <p className="mt-4 text-center text-[12px] text-ink-4">最多提供 50 页，更早的内容请使用搜索或主题页。</p>}
+      {data.page >= 50 && <p className="mt-4 text-center text-[12px] text-ink-4">São no máximo 50 páginas; para conteúdo mais antigo, use a busca ou as páginas de tópicos.</p>}
     </div>
   );
 }

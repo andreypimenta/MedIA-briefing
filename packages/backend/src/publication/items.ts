@@ -6,6 +6,7 @@ import { POLICY } from "@aihot/site";
 import { sql, type Db } from "../db.ts";
 import { isEmptyOrLinkOnly } from "../content/posts.ts";
 import { proxiedImage, proxiedImageSet } from "../media/imgproxy.ts";
+import { isSiteLanguage, SITE_LANG } from "../lib/text.ts";
 import { displayTags, publicSourceName } from "./rules.ts";
 import { seatedCondition } from "./scope.ts";
 
@@ -39,7 +40,7 @@ export interface ItemRow {
   story_public_id: string | null;
   story_title: string | null;
   zh_text: string | null;
-  /** Chinese translation of the post an X post quotes. */
+  /** Site-language translation of the post an X post quotes. */
   quoted_zh: string | null;
 }
 
@@ -66,7 +67,7 @@ export const ITEM_FROM = sql`
   JOIN sources s ON s.id = p.source_id
   JOIN articles a ON a.id = p.article_id
   LEFT JOIN stories st ON st.id = p.story_id AND st.merged_into IS NULL
-  LEFT JOIN translations tr ON tr.article_id = p.article_id AND tr.lang = 'zh' AND tr.revision >= a.revision
+  LEFT JOIN translations tr ON tr.article_id = p.article_id AND tr.lang = ${SITE_LANG} AND tr.revision >= a.revision
   LEFT JOIN quote_translations qt ON p.channel = 'x' AND qt.tweet_id = substring(a.x_post->'quoted'->>'url' from '/status/([0-9]+)')`;
 
 export function channelCondition(channel: ChannelKey | null | undefined) {
@@ -182,14 +183,14 @@ export function toFeedItemSummary(row: ItemRow): FeedItemSummary {
 }
 
 /**
- * An article written in Chinese: its language says so, or its text opens in Chinese and it is not marked
- * English (the translator's rule, editorial/translate.ts). Every exit shows such a body as it is.
+ * An article written in the site's language: its language says so, or, with none given, its text reads
+ * so (the translator's rule, editorial/translate.ts). Every exit shows such a body as it is.
  */
 export function isChineseBody(a: { language?: string | null; body_text?: string | null }): boolean {
-  return a.language === "zh" || (/[一-鿿]/.test(a.body_text?.slice(0, 400) ?? "") && a.language !== "en");
+  return isSiteLanguage(a.language, a.body_text ?? "");
 }
 
-/** The complete Chinese translation an export (Markdown, full RSS) carries; a page also shows a partial one. */
+/** The complete site-language translation an export (Markdown, full RSS) carries; a page also shows a partial one. */
 export function exportTranslation(a: { language?: string | null; body_text?: string | null; tr_html?: string | null; tr_complete?: boolean | null }): string | null {
   return !isChineseBody(a) && a.tr_html && a.tr_complete ? a.tr_html : null;
 }

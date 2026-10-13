@@ -120,11 +120,15 @@ export async function periodReports(start: Date, end: Date): Promise<ReportRow[]
   });
 }
 
+/** The role an entry's source plays, as frozen in an issue: official (on X or elsewhere), X·KOL, WeChat, press. */
+export const ROLE_OFFICIAL = "oficial";
+export const ROLE_OFFICIAL_X = "X·oficial";
+
 function roleOf(kind: string, official: boolean): string {
-  if (official) return kind === "x_search" ? "X·官方" : "官方";
+  if (official) return kind === "x_search" ? ROLE_OFFICIAL_X : ROLE_OFFICIAL;
   if (kind === "x_search") return "X·KOL";
-  if (kind === "mp_account") return "公众号";
-  return "媒体";
+  if (kind === "mp_account") return "WeChat";
+  return "imprensa";
 }
 
 function reportEntry(r: ReportRow): ReportEntry {

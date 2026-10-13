@@ -21,13 +21,14 @@ import { buildMaterial, firstImagePart, loadAnalyzeInput, type AnalyzeInputArtic
 import { pageFetchable } from "../content/extract.ts";
 import { shutdownSignal } from "../jobs/queue.ts";
 import {
-  buildArticlePrompt, buildLongTweetPrompt, buildShortTweetPrompt, finalizeCopy, isShortTweetInput, looksZh, MAX_BODY_CHARS, missingEvidence,
+  buildArticlePrompt, buildLongTweetPrompt, buildShortTweetPrompt, finalizeCopy, isShortTweetInput, looksSiteLanguage, MAX_BODY_CHARS, missingEvidence,
   needsShortTweetTranslation, parseTranslateOutput, PREFILTER_SYSTEM, prefilterUser, translateInputOf, UNDERSTAND_SYSTEM, understandUser,
   type IdentityGuard,
 } from "./writing.ts";
 import { CATEGORY_GUIDE, CATEGORY_TAGS, ENTITIES, ENTITY_TAGS, ITEM_TYPES, normalizeTags, TOPIC_TAGS } from "./vocabulary.ts";
 import { promptText, promptVersion } from "./prompts.ts";
 import { originalPostCopy } from "../content/posts.ts";
+import { SITE_TIME_ZONE, SITE_UTC_OFFSET } from "@aihot/contracts/time";
 
 export { buildMaterial, loadAnalyzeInput, type AnalyzeInputArticle };
 
@@ -73,23 +74,23 @@ export const SCORE_SYSTEM = promptText("selection-score");
 export const ScoreSchema = z.object({ attentionScore: z.coerce.number().int().min(0).max(100) });
 
 const SCORE_TIME = new Intl.DateTimeFormat("sv-SE", {
-  timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  timeZone: SITE_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
 });
 
-/** The score input's time: Beijing time, ISO 8601 with +08:00 (the form the prompt was tuned on). */
+/** The score input's time: site time, ISO 8601 with the site's offset. */
 export function scoreInputTime(at: Date): string {
   const ms = at.getTime() % 1000;
-  return `${SCORE_TIME.format(at).replace(" ", "T")}${ms ? `.${String(ms).padStart(3, "0")}` : ""}+08:00`;
+  return `${SCORE_TIME.format(at).replace(" ", "T")}${ms ? `.${String(ms).padStart(3, "0")}` : ""}${SITE_UTC_OFFSET}`;
 }
 
 /**
  * The score input: no source facts (the prompt forbids guessing them), the publication time, the
- * original title (items are scored before any Chinese copy exists) and the whole body.
+ * original title (items are scored before any site-language copy exists) and the whole body.
  */
 export function buildScoreInput(a: AnalyzeInputArticle): string {
   let body: string;
   if (a.xPost) {
-    const quoted = a.xPost.quoted?.text ? `\n\n[引用 ${a.xPost.quoted.handle ? `@${a.xPost.quoted.handle}` : "原推文"}]：${a.xPost.quoted.text}` : "";
+    const quoted = a.xPost.quoted?.text ? `\n\n[Citação de ${a.xPost.quoted.handle ? `@${a.xPost.quoted.handle}` : "post original"}]: ${a.xPost.quoted.text}` : "";
     body = `${String(a.xPost.text ?? "").trim()}${quoted}`.trim();
   } else {
     body = (a.bodyText ?? a.excerpt ?? "").trim();
@@ -97,10 +98,10 @@ export function buildScoreInput(a: AnalyzeInputArticle): string {
   if (!body) body = a.title;
   const at = a.publishedAt;
   return [
-    "请按系统规则评估以下单篇材料所代表的事件。只输出 attentionScore。",
-    `【发布时间（北京时间）】\n${at ? scoreInputTime(at) : "未知（收录时间不代表发布时间）"}`,
-    `【标题】\n${a.title.trim()}`,
-    `【完整正文】\n${body.length > MAX_BODY_CHARS ? body.slice(0, MAX_BODY_CHARS) : body}`,
+    "Siga as regras do sistema para avaliar o evento que o material abaixo representa. Devolva só attentionScore.",
+    `【Data de publicação (horário de Brasília)】\n${at ? scoreInputTime(at) : "desconhecida (a data de coleta não é a data de publicação)"}`,
+    `【Título】\n${a.title.trim()}`,
+    `【Corpo completo】\n${body.length > MAX_BODY_CHARS ? body.slice(0, MAX_BODY_CHARS) : body}`,
   ].join("\n\n");
 }
 
@@ -108,20 +109,20 @@ export function buildScoreInput(a: AnalyzeInputArticle): string {
 
 const PrefilterSchema = z.object({
   label: z.preprocess((v) => String(v ?? "").trim().toUpperCase(), z.enum(["PASS", "BLOCK", "UNKNOWN"])),
-  reason: z.string().max(200).catch(""),
+  reason: z.string().max(500).catch(""),
 });
 
 const FactSchema = z
   .object({
-    title: z.string().max(80),
-    subject: z.string().max(80).nullable().optional(),
-    action: z.string().max(80).nullable().optional(),
-    object: z.string().max(160).nullable().optional(),
+    title: z.string().max(200),
+    subject: z.string().max(200).nullable().optional(),
+    action: z.string().max(200).nullable().optional(),
+    object: z.string().max(400).nullable().optional(),
     occurredAt: z.string().nullable().optional(),
     evidence: z.string().trim().max(600).nullable().catch(null),
     conditions: z.array(z.object({
       // Older reusable receipts may also contain a paraphrase. New extraction only copies evidence.
-      text: z.string().trim().min(1).max(200).optional().catch(undefined),
+      text: z.string().trim().min(1).max(500).optional().catch(undefined),
       quote: z.string().trim().min(1).max(400),
     }).nullable().catch(null)).catch([]),
   })
@@ -141,23 +142,23 @@ const UnderstandSchema = z.object({
   authorRole: z.enum(["principal", "observer", "relayer"]).catch("relayer"),
   // The understanding prompt asks for tags; the public ones come from the structure step.
   tags: z.array(z.string()).max(12).catch([]),
-  editorialJudgment: z.string().max(400).catch(""),
-  titleZh: z.string().trim().min(1).max(200),
+  editorialJudgment: z.string().max(600).catch(""),
+  titleZh: z.string().trim().min(1).max(300),
   summaryZh: z.string().trim().min(1).max(4000),
 });
 
 const SummarizeSchema = z.object({ titleZh: z.string(), summaryZh: z.string(), bodyZh: z.string() });
 
-const ZH_COUNT = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"];
+const COUNT_WORDS = ["zero", "uma", "duas", "três", "quatro", "cinco", "seis", "sete", "oito", "nove", "dez", "onze", "doze"];
 
 /** The structure step owns the public category and tags, as well as grouping evidence (filled from the pack's vocabulary). */
 export const STRUCTURE_SYSTEM = promptText("structure", {
-  categoryCount: ZH_COUNT[CATEGORIES.length] ?? String(CATEGORIES.length),
+  categoryCount: COUNT_WORDS[CATEGORIES.length] ?? String(CATEGORIES.length),
   categoryGuide: CATEGORY_GUIDE,
-  categoryTags: CATEGORY_TAGS.join("、"),
-  topicTags: TOPIC_TAGS.join("、"),
-  entityTags: ENTITY_TAGS.join("、"),
-  entities: Object.entries(ENTITIES).map(([id, e]) => `${id}（${e.aliases.slice(0, 3).join("/")}）`).join("，"),
+  categoryTags: CATEGORY_TAGS.join(", "),
+  topicTags: TOPIC_TAGS.join(", "),
+  entityTags: ENTITY_TAGS.join(", "),
+  entities: Object.entries(ENTITIES).map(([id, e]) => `${id} (${e.aliases.slice(0, 3).join("/")})`).join(", "),
 });
 
 /** Keep only quotes present both in the original material and in the text the structure model saw. */
@@ -195,7 +196,7 @@ export interface AnalysisRun {
    * is not scored. `refused`: the model's content filter declined it, so it is not selected.
    */
   scores: { model: string; threshold: number; values: number[]; receiptIds: number[]; reused: boolean; refused?: boolean } | null;
-  /** The reader-facing copy: `understand` (selected, near-selected), `summarize`, `verbatim` (a Chinese short post), `none`. */
+  /** The reader-facing copy: `understand` (selected, near-selected), `summarize`, `verbatim` (a short post already in the site's language), `none`. */
   writing: {
     kind: "understand" | "summarize" | "verbatim" | "none";
     model: string | null;
@@ -377,9 +378,9 @@ async function runSummarize(a: AnalyzeInputArticle, opts: StepOpts): Promise<Non
   const short = isShortTweetInput(t);
   const main = collapseWhitespace(t.mainText || t.title);
   const plain = { reasonZh: null, receiptIds: [] as number[], reused: true };
-  // A short post already in Chinese is its own copy, and too little text is not written up from a title.
+  // A short post already in Portuguese is its own copy, and too little text is not written up from a title.
   if (short && !needsShortTweetTranslation(main)) return { kind: "verbatim", model: null, titleZh: main, summaryZh: main, ...plain };
-  if (!short && t.text.trim().length < 20) return { kind: "none", model: null, titleZh: looksZh(t.title) ? t.title : "", summaryZh: "", ...plain };
+  if (!short && t.text.trim().length < 20) return { kind: "none", model: null, titleZh: looksSiteLanguage(t.title) ? t.title : "", summaryZh: "", ...plain };
   const model = await modelFor("summarize");
   checkAnalysisRunning();
   const res = await chatJson({
@@ -398,10 +399,10 @@ async function runSummarize(a: AnalyzeInputArticle, opts: StepOpts): Promise<Non
   });
   const p = res.data;
   const draft = short
-    ? { titleZh: p.titleZh || (looksZh(main) ? main : ""), summaryZh: p.bodyZh || p.summaryZh }
+    ? { titleZh: p.titleZh || (looksSiteLanguage(main) ? main : ""), summaryZh: p.bodyZh || p.summaryZh }
     : isX
       ? { titleZh: p.titleZh, summaryZh: p.summaryZh || p.bodyZh }
-      : { titleZh: p.titleZh || (looksZh(t.title) ? t.title : ""), summaryZh: p.summaryZh };
+      : { titleZh: p.titleZh || (looksSiteLanguage(t.title) ? t.title : ""), summaryZh: p.summaryZh };
   const copy = finalizeCopy(t, draft);
   return { kind: "summarize", model: res.model, titleZh: copy.titleZh, summaryZh: copy.summaryZh, reasonZh: null, identityGuard: copy.identityGuard, receiptIds: [res.receiptId], reused: res.reused };
 }

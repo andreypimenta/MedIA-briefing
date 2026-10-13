@@ -22,7 +22,7 @@ test("fact and reading recall agree across cold, full and overflowing vector cac
   const [story] = await sql<{ id: number }[]>`INSERT INTO stories (public_id, title, first_report_at, latest_at)
     VALUES (${randomUUID()}, ${T}, now(), now()) RETURNING id`;
   const facts: number[] = [];
-  const items = ["first", "second", "background"].map(name => ({ id: `${T}-${name}`, text: `${T}-${name}。` }));
+  const items = ["first", "second", "background"].map(name => ({ id: `${T}-${name}`, text: `${T}-${name}. ` }));
   for (const [index, item] of items.entries()) {
     await sql`INSERT INTO articles (id, source_id, identity_key, url, title, body_text, discovered_at, timeline_at, published_at)
       VALUES (${item.id}, ${T}, ${item.id}, ${`https://example.org/${item.id}`}, ${item.id}, 'saved background', now(), now(), now())`;
@@ -51,7 +51,7 @@ test("fact and reading recall agree across cold, full and overflowing vector cac
         if (${stale}) {
           const text = 'changed report';
           await sql\`UPDATE publications SET title = \${text}, revision = 2 WHERE article_id = \${items[0].id}\`;
-          await sql\`UPDATE embeddings SET text_hash = \${sha256(text + '。')}, vector = ARRAY[0,1]::real[] WHERE ref_id = \${items[0].id}\`;
+          await sql\`UPDATE embeddings SET text_hash = \${sha256(text + '. ')}, vector = ARRAY[0,1]::real[] WHERE ref_id = \${items[0].id}\`;
         }
         const facts = await recallFacts(${JSON.stringify(`${T}-query`)}, 'query', 0.5, 10);
         const background = await recallSelectedBackground(${JSON.stringify(`${T}-reading-query`)}, 'query', 0.5);

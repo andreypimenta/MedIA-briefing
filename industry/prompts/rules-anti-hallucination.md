@@ -1,12 +1,17 @@
 
-【防幻觉规则 — 严格遵守】
+【Regras contra alucinação — siga à risca】
 
-1. 严禁添加原文未明确提到的功能 / 工具 / 数字 / 版本 / 默认值 / 限制
-2. 不确定的细节宁可省略，也不要"听起来合理地补全"
-3. 原文里某要点你不理解，原文照抄关键词，不要"翻译性发挥"
-4. 摘要里出现的每一个产品名 / 功能名 / 数字 / 版本号必须在原文里能找到对应
-5. 原文太短或缺关键信息时，宁可返回更短的摘要，不要靠"行业常识"扩写
-6. 不要复述你"知道"的同类产品功能 — 只翻译这一篇原文实际写的东西
-7. 时间锚定：原文用相对时间（本周 / 上月 / 5 月 / 昨天 / 近日 / 今年）就照抄那个说法，绝不补全成具体年份；原文没明确写出年份，摘要里就不许出现年份。即便下方提供了【时间锚点】，那只供你理解时序，不要据此把相对时间换算成绝对年份写进摘要。
-8. 不得强化原文语气或范围："多项研究未发现"不能改成"没有研究"，"正在探索"不能改成"已经采用"。
-9. "独立"、"完全"、"首次"、"唯一"等排他性表述只有原文明确写出时才能保留。
+1. É proibido acrescentar funcionalidade, ferramenta, número, versão, padrão, limitação, indicação ou população que o original não mencione explicitamente.
+2. Na dúvida sobre um detalhe, omita; não "complete de forma plausível".
+3. Se não entender algum ponto do original, copie a palavra-chave do original em vez de "traduzir criativamente".
+4. Todo nome de produto, recurso, instituição, número e versão que aparecer no resumo precisa ter correspondência no original.
+5. Se o original for curto ou não tiver informação-chave, devolva um resumo mais curto; não expanda com "conhecimento do setor".
+6. Não repita o que você "sabe" sobre produtos ou estudos semelhantes; traduza e resuma só o que este original realmente diz.
+7. Âncora de tempo: se o original usa tempo relativo (esta semana / mês passado / em maio / ontem / recentemente / este ano), copie essa forma e nunca complete com um ano específico; se o original não escreve o ano, o resumo não pode ter ano. Mesmo que haja uma 【Âncora de tempo】 abaixo, ela só serve para você entender a sequência; não a use para converter tempo relativo em ano absoluto no resumo.
+8. Não intensifique o tom nem amplie o alcance do original: "vários estudos não encontraram" não vira "nenhum estudo encontrou", "está explorando" não vira "já adotou", "piloto" não vira "implantação", "em um hospital" não vira "nos hospitais".
+9. Expressões exclusivas como "independente", "totalmente", "pela primeira vez", "o primeiro", "o único" só podem ser mantidas se o original as escrever explicitamente.
+10. Números de estudo: nunca invente nem arredonde de outro jeito tamanho de amostra (n), AUC, sensibilidade, especificidade, intervalo de confiança, valor de p, razão de riscos ou número de centros; se o original não dá o número, não escreva número.
+11. Desenho do estudo: não atribua desenho que o original não declara. Retrospectivo não vira prospectivo, validação não vira ensaio clínico, estudo de um centro não vira multicêntrico, avaliação em dados simulados ou em prova não vira desempenho em pacientes.
+12. Status regulatório: não escreva "aprovado", "liberado pela FDA", "registrado na ANVISA" ou "com marcação CE" se o original não disser isso; "submeteu pedido", "em análise", "designação Breakthrough" e "aprovação" são coisas diferentes e devem ser mantidas como no original.
+13. Desfecho e causalidade: não invente desfecho clínico (mortalidade, tempo de internação, diagnóstico perdido) que o original não relata, e não transforme associação ou correlação em causa ("está associado a" não vira "reduz" ou "causa"); métrica substituta (AUC, acurácia) não vira benefício ao paciente.
+14. Status de publicação: preprint não vira "publicado" nem "revisado por pares"; resumo de congresso não vira artigo publicado; não atribua revista que o original não cita.

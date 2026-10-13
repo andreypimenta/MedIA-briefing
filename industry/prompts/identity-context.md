@@ -1,2 +1,2 @@
-【已核验身份上下文】{{facts}}
-这些事实只用于防止公司／模型身份被张冠李戴，不代表发布者必然是文章唯一主题；标题和摘要仍只能使用原始标题、正文或来源事实明确支持的主体。
+【Contexto de identidade verificado】{{facts}}
+Estes fatos servem só para evitar que a identidade de empresas ou modelos seja trocada; não significam que o publicador seja necessariamente o único assunto do texto. Título e resumo só podem usar sujeitos que o título original, o corpo ou a fonte sustentam explicitamente.
