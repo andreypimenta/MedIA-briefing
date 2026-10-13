@@ -139,6 +139,15 @@ export interface RssRead {
   notModified: boolean;
 }
 
+/** The opening of an untitled item's description, cut at a word boundary: its title. */
+function titleFromDescription(description: string): string {
+  const plain = collapseWhitespace(stripTags(description));
+  if (plain.length <= 120) return plain;
+  const cut = plain.slice(0, 120);
+  const space = cut.lastIndexOf(" ");
+  return `${(space > 60 ? cut.slice(0, space) : cut).trimEnd()}…`;
+}
+
 export async function fetchRss(source: SourceRow, opts: { force?: boolean } = {}): Promise<RssRead> {
   const url = String(source.config.feedUrl ?? "");
   if (!url) throw new FetchError("feedUrl missing");
@@ -182,10 +191,11 @@ export async function fetchRss(source: SourceRow, opts: { force?: boolean } = {}
       // which a browser plays. Its identity stays the one its guid gives, and it has no page to read a body from.
       const mediaFile = !page && guid ? enclosures.find((e) => /^(audio|video)\//.test(e?.["@type"] ?? ""))?.["@url"] ?? "" : "";
       const link = page || mediaFile || guid;
-      const title = collapseWhitespace(stripTags(text(it.title)));
+      const description = text(it.description);
+      // RSS 2.0 lets an item carry only a description (social posts, e.g. Bluesky profiles): its opening stands as the title.
+      const title = collapseWhitespace(stripTags(text(it.title))) || titleFromDescription(description);
       if (!link || !title) continue;
       const contentEncoded = text(it["content:encoded"]);
-      const description = text(it.description);
       const video = isVideoPageUrl(link);
       const videoExcerpt = video ? mediaDescription(it) : null;
       const bodyHtmlRaw = contentEncoded || (summaryIsBody && !video ? description : "");

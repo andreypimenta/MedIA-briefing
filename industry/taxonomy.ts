@@ -110,6 +110,22 @@ export const ENTITIES: Record<string, { name: string; displayTag: string | null;
   "siemens-healthineers": { name: "Siemens Healthineers", displayTag: null, aliases: ["Siemens Healthineers", "Siemens"] },
   "ge-healthcare": { name: "GE HealthCare", displayTag: null, aliases: ["GE HealthCare", "GE Healthcare"] },
   "isomorphic-labs": { name: "Isomorphic Labs", displayTag: null, aliases: ["Isomorphic Labs", "Isomorphic"] },
+  // China
+  nmpa: { name: "NMPA", displayTag: null, aliases: ["NMPA", "国家药品监督管理局", "国家药监局", "National Medical Products Administration"], otherNames: ["CMDE", "医疗器械技术审评中心", "国家药监局器审中心", "CFDA"] },
+  "yidu-tech": { name: "Yidu Tech", displayTag: null, aliases: ["医渡科技", "Yidu Tech", "医渡"], otherNames: ["Yidu Technology", "2158.HK"] },
+  "united-imaging": { name: "United Imaging", displayTag: null, aliases: ["联影", "联影医疗", "联影智能", "United Imaging", "United Imaging Intelligence"], otherNames: ["uAI", "United Imaging Healthcare", "UIH"] },
+  infervision: { name: "Infervision", displayTag: null, aliases: ["推想医疗", "推想科技", "Infervision"] },
+  "iflytek-healthcare": { name: "iFlytek Healthcare", displayTag: null, aliases: ["讯飞医疗", "科大讯飞医疗", "iFlytek Healthcare", "智医助理"], otherNames: ["讯飞星火医疗大模型", "iFlytek"] },
+  shukun: { name: "Shukun", displayTag: null, aliases: ["数坤科技", "数坤", "Shukun", "Shukun Technology"] },
+  deepwise: { name: "Deepwise", displayTag: null, aliases: ["深睿医疗", "Deepwise"] },
+  airdoc: { name: "Airdoc", displayTag: null, aliases: ["鹰瞳科技", "鹰瞳", "Airdoc"], otherNames: ["鹰瞳Airdoc", "2251.HK"] },
+  "alibaba-health": { name: "Alibaba Health", displayTag: null, aliases: ["阿里健康", "Alibaba Health"], otherNames: ["阿里巴巴达摩院医疗", "DAMO Academy"] },
+  "ant-healthcare": { name: "Ant Group (saúde)", displayTag: null, aliases: ["蚂蚁阿福", "安诊儿", "蚂蚁AQ", "Ant Group"], otherNames: ["蚂蚁集团", "蚂蚁医疗大模型"] },
+  "ping-an-health": { name: "Ping An Health", displayTag: null, aliases: ["平安健康", "平安好医生", "Ping An Health", "Ping An Good Doctor"] },
+  baichuan: { name: "Baichuan", displayTag: null, aliases: ["百川智能", "Baichuan", "Baichuan-M2", "Baichuan-M3"], otherNames: ["百小应", "王小川"] },
+  "jd-health": { name: "JD Health", displayTag: null, aliases: ["京东健康", "JD Health", "京医千询"] },
+  "baidu-health": { name: "Baidu (saúde)", displayTag: null, aliases: ["百度灵医", "灵医智惠", "Baidu Lingyi"] },
+  "tencent-health": { name: "Tencent Health", displayTag: null, aliases: ["腾讯健康", "腾讯觅影", "Tencent Miying", "Tencent Health"] },
 };
 
 /**

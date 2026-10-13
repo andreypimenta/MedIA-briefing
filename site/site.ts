@@ -222,12 +222,13 @@ export const SOURCE_DEFAULTS = {
 };
 
 /**
- * 社区站的信源（填信源 id）：算热度时按发帖的账号计，一个账号算一个独立来源，而不是整个信源只算一个。
- * dev 是 dev.to 的文章流，hn 是 Hacker News 的帖子流。
+ * Fontes de comunidade (ids de fonte): na repercussão, cada autor conta como uma fonte independente, em vez de a fonte inteira contar uma vez.
+ * dev é o feed de artigos do dev.to, hn o do Hacker News (autor em dc:creator) e reddit os feeds Atom de subreddits (autor "/u/nome").
  */
-export const COMMUNITY_FEEDS: { dev: string[]; hn: string[] } = {
+export const COMMUNITY_FEEDS: { dev: string[]; hn: string[]; reddit: string[] } = {
   dev: [],
-  hn: [],
+  hn: ["rss-hn-medical"],
+  reddit: ["rss-reddit-medicine", "rss-reddit-radiology", "rss-reddit-residency", "rss-reddit-healthit", "rss-reddit-machinelearning-medical"],
 };
 
 /** 各页分享图（/og/pages/*.png）上的文字。主题目录页的那张按主题数自动生成。 */

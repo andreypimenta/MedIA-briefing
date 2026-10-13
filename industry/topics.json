@@ -116,6 +116,13 @@
       "definition": "Tempus: oncologia de precisão, dados clínico-genômicos e diagnósticos com IA."
     },
     {
+      "slug": "nmpa",
+      "name": "NMPA (China)",
+      "group": "company",
+      "entityId": "nmpa",
+      "definition": "Aprovações e normas do regulador chinês (NMPA/CMDE) para dispositivos médicos com IA."
+    },
+    {
       "slug": "radiologia",
       "name": "Radiologia",
       "group": "field",

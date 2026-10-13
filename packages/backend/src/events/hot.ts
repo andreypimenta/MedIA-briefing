@@ -105,7 +105,7 @@ export function behindSources(clocks: SourceClock[], at: number, grace: boolean)
 /**
  * The heat evidence as it stands now, for every reader of story_signals: a report withdrawn since no
  * longer counts, a source counts in its current role (editorial or signal) and an isolated one not at
- * all, and a participant is the independent actor behind a post: a DEV or Hacker News author for the
+ * all, and a participant is the independent actor behind a post: a DEV, Hacker News or Reddit author for the
  * community feeds the pack names (posts by many independent people), an operator's media matrix (signal
  * group), a company's own channels (owner), else the source itself. Admin changes to roles, groups and
  * owners therefore reach the heat at once, without rewriting stored signals.
@@ -116,6 +116,7 @@ export const currentSignals = () => sql`(
     CASE
       WHEN s.id = ANY(${COMMUNITY_FEEDS.dev}::text[]) THEN coalesce('dev:account:' || lower(substring(a.url from '^https://dev\.to/([A-Za-z0-9_-]{1,64})/[^/?#]+/?$')), 'unresolved:' || s.id)
       WHEN s.id = ANY(${COMMUNITY_FEEDS.hn}::text[]) THEN coalesce('hn:account:' || substring(a.author from '^[A-Za-z0-9_-]{1,64}$'), 'unresolved:' || s.id)
+      WHEN s.id = ANY(${COMMUNITY_FEEDS.reddit}::text[]) THEN coalesce('reddit:account:' || lower(substring(a.author from '^/?u/([A-Za-z0-9_-]{1,64})$')), 'unresolved:' || s.id)
       WHEN s.signal_group_id IS NOT NULL THEN 'group:' || s.signal_group_id
       WHEN s.owner_entity_id IS NOT NULL THEN 'owner:' || s.owner_entity_id
       ELSE 'source:' || s.id
